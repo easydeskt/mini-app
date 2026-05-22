@@ -7,4 +7,4 @@ export type MeResponse = {
   open_ticket_count: number;
 };
 
-export const fetchMe = () => apiClient.get<MeResponse>('/api/me');
+export const fetchMe = () => apiClient.get<MeResponse>('/api/v1/me');

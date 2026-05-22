@@ -386,7 +386,7 @@ export function installMockApi(): void {
   ): Promise<Response> {
     const url = String(input);
 
-    if (url.includes('/api/me')) {
+    if (url.includes('/api/v1/me')) {
       return jsonResponse({
         agent: MOCK_AGENTS[CURRENT_AGENT_ID],
         in_progress_ticket_count: MOCK_TICKETS.filter(
@@ -396,10 +396,10 @@ export function installMockApi(): void {
       });
     }
 
-    const ticketActionMatch = url.match(/\/api\/tickets\/(\d+)\/(assign|free|resolve|close|reopen|priority|tags|merge)/);
+    const ticketActionMatch = url.match(/\/api\/v1\/tickets\/(\d+)\/(assign|free|resolve|close|reopen|priority|tags|merge)/);
     if (ticketActionMatch) return noContent();
 
-    const ticketDetailMatch = url.match(/\/api\/tickets\/(\d+)$/);
+    const ticketDetailMatch = url.match(/\/api\/v1\/tickets\/(\d+)$/);
     if (ticketDetailMatch) {
       const ticket = MOCK_TICKETS.find(t => t.id === Number(ticketDetailMatch[1]));
       return ticket
@@ -407,9 +407,9 @@ export function installMockApi(): void {
         : jsonResponse({ error_message: 'Ticket not found' }, 404);
     }
 
-    if (url.includes('/api/tickets')) return jsonResponse(MOCK_TICKETS);
+    if (url.includes('/api/v1/tickets')) return jsonResponse(MOCK_TICKETS);
 
-    const agentDetailMatch = url.match(/\/api\/agents\/([^/?]+)/);
+    const agentDetailMatch = url.match(/\/api\/v1\/agents\/([^/?]+)/);
     if (agentDetailMatch) {
       const agent = MOCK_AGENTS[agentDetailMatch[1]];
       return agent
@@ -417,9 +417,9 @@ export function installMockApi(): void {
         : jsonResponse({ error_message: 'Agent not found' }, 404);
     }
 
-    if (url.includes('/api/agents')) return jsonResponse(Object.values(MOCK_AGENTS));
+    if (url.includes('/api/v1/agents')) return jsonResponse(Object.values(MOCK_AGENTS));
 
-    if (url.includes('/api/tags')) return jsonResponse(MOCK_TAGS);
+    if (url.includes('/api/v1/tags')) return jsonResponse(MOCK_TAGS);
 
     return originalFetch(input, init);
   };

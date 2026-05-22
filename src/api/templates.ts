@@ -8,7 +8,7 @@ export type ApiTemplateResponse = {
 };
 
 export const fetchTemplate = (id: number) =>
-  apiClient.get<ApiTemplateResponse>(`/api/templates/${id}`);
+  apiClient.get<ApiTemplateResponse>(`/api/v1/templates/${id}`);
 
 export const fetchTemplates = () =>
-  apiClient.get<ApiTemplateResponse[]>('/api/templates');
+  apiClient.get<ApiTemplateResponse[]>('/api/v1/templates');

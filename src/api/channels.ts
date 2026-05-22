@@ -16,7 +16,7 @@ export type ApiChannelProviderResponse = {
 };
 
 export const fetchChannelProviders = () =>
-  apiClient.get<ApiChannelProviderResponse[]>('/api/channels/providers');
+  apiClient.get<ApiChannelProviderResponse[]>('/api/v1/channels/providers');
 
 export const fetchChannels = (enabledOnly = false) =>
-  apiClient.get<ApiChannelResponse[]>(`/api/channels?enabledOnly=${enabledOnly}`);
+  apiClient.get<ApiChannelResponse[]>(`/api/v1/channels?enabledOnly=${enabledOnly}`);

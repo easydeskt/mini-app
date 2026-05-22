@@ -7,4 +7,4 @@ export type ApiTagResponse = {
   name: string;
 };
 
-export const fetchTags = () => apiClient.get<ApiTagResponse[]>('/api/tags');
+export const fetchTags = () => apiClient.get<ApiTagResponse[]>('/api/v1/tags');
