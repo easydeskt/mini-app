@@ -1,0 +1,12 @@
+.idea/
+build/
+dist/
+node_modules/
+*.iml
+*.log
+*.log.gz
+npm-debug.log*
+*.local
+.env
+*.png
+*.jpg
