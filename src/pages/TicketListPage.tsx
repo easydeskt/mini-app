@@ -46,7 +46,7 @@ export function TicketListPage() {
   const { data: agent, isLoading: agentLoading } = useCurrentAgent();
   const { data: agents } = useAgents();
   const { data: stats } = useWorkspaceStats();
-  const { data: tickets, isError: ticketsError, isLoading: ticketsLoading, refetch: refetchTickets } = useTickets();
+  const { data: tickets, isError: ticketsError, isLoading: ticketsLoading, refetch: refetchTickets, error: ticketsFetchError } = useTickets();
   const t = useT();
 
   const agentMap = useMemo<Record<string, Agent>>(
@@ -138,7 +138,8 @@ export function TicketListPage() {
 
   return (
     <div className="touch-pan-y flex min-h-dvh flex-col bg-background" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-      <div className="sticky top-0 z-10 bg-background/80 px-4 pb-3 pt-4 backdrop-blur-md">
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md">
+        <div className="mx-auto max-w-120 px-4 pb-4 pt-4">
         <div className="flex items-start justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">
@@ -165,10 +166,11 @@ export function TicketListPage() {
             </button>
           </div>
         </div>
+        </div>
       </div>
 
       {showControls && (
-        <div className="px-4 pb-2 pt-2">
+        <div className="mx-auto w-full max-w-120 px-4 pb-2 pt-2">
           <div className="space-y-2">
             <div className="relative">
               <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -213,7 +215,7 @@ export function TicketListPage() {
       )}
 
       {isLoading && (
-        <div className="space-y-2 px-4 pt-2">
+        <div className="mx-auto w-full max-w-120 space-y-2 px-4 pt-2">
           {Array.from({ length: 5 }).map((_, i) => (
             <TicketSkeleton key={i} />
           ))}
@@ -224,6 +226,7 @@ export function TicketListPage() {
         <FetchError
           description={t('tickets.load_error')}
           onRetry={refetchTickets}
+          error={ticketsFetchError}
         />
       )}
 
@@ -257,7 +260,7 @@ export function TicketListPage() {
       )}
 
       {!isLoading && !ticketsError && filteredTickets.length > 0 && (
-        <div className="space-y-2 px-4 pb-4 pt-1">
+        <div className="mx-auto w-full max-w-120 space-y-2 px-4 pb-4 pt-1">
           {hasUnreadGroup && (
             <>
               <TicketGroupHeader

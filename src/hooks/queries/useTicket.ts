@@ -5,8 +5,8 @@ import { queryKeys } from '@/api/query-keys';
 import type { Ticket } from '@/types/ticket';
 import { toTicket } from './useTickets';
 
-export function useTicket(id: number): { data: Ticket | undefined; isError: boolean; isLoading: boolean; refetch: () => void } {
-  const { data, isError, isLoading, refetch } = useQuery({
+export function useTicket(id: number): { data: Ticket | undefined; isError: boolean; isLoading: boolean; refetch: () => void; error: unknown } {
+  const { data, isError, isLoading, refetch, error } = useQuery({
     queryKey: queryKeys.tickets.detail(id),
     queryFn: () => fetchTicket(id),
     retry: false,
@@ -16,5 +16,6 @@ export function useTicket(id: number): { data: Ticket | undefined; isError: bool
     isError,
     isLoading,
     refetch: () => { void refetch(); },
+    error,
   };
 }

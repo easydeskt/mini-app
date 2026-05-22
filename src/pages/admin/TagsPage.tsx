@@ -42,7 +42,7 @@ function TagRow({ tag, onEdit }: TagRowProps) {
 }
 
 export function TagsPage() {
-  const { data: tags, isError, isLoading, refetch } = useTags();
+  const { data: tags, isError, isLoading, refetch, error } = useTags();
   const t = useT();
 
   const [editTarget, setEditTarget] = useState<Tag | null>(null);
@@ -54,7 +54,8 @@ export function TagsPage() {
   return (
     <div className="flex min-h-dvh flex-col bg-background">
 
-      <div className="sticky top-0 z-10 bg-background/80 px-4 pb-3 pt-4 backdrop-blur-md">
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md">
+        <div className="mx-auto max-w-[480px] px-4 pb-3 pt-4">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">{t('tags.page_title') ?? 'Tags'}</h1>
@@ -69,9 +70,10 @@ export function TagsPage() {
             <Plus className="h-4 w-4" />
           </Button>
         </div>
+        </div>
       </div>
 
-      <div className="px-4 pb-8">
+      <div className="mx-auto flex w-full max-w-[480px] flex-1 flex-col px-4 pb-8">
         {isLoading ? (
           <div className="space-y-0 overflow-hidden rounded-xl border bg-card">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -82,7 +84,7 @@ export function TagsPage() {
             ))}
           </div>
         ) : isError ? (
-          <FetchError description={t('tags.load_error') ?? 'Failed to load the tag list'} onRetry={refetch} />
+          <FetchError description={t('tags.load_error') ?? 'Failed to load the tag list'} onRetry={refetch} error={error} />
         ) : tags.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted-foreground">{t('tags.empty') ?? 'No tags'}</p>
         ) : (

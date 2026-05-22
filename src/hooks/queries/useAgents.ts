@@ -18,11 +18,11 @@ export function toAgent(a: ApiAgentResponse): Agent {
   };
 }
 
-export function useAgents(): { data: Agent[]; isError: boolean; isLoading: boolean; refetch: () => void } {
-  const { data = [], isError, isLoading, refetch } = useQuery({
+export function useAgents(): { data: Agent[]; isError: boolean; isLoading: boolean; refetch: () => void; error: unknown } {
+  const { data = [], isError, isLoading, refetch, error } = useQuery({
     queryKey: queryKeys.agents.all,
     queryFn: () => fetchAgents(),
     retry: false,
   });
-  return { data: data.map(toAgent), isError, isLoading, refetch: () => { void refetch(); } };
+  return { data: data.map(toAgent), isError, isLoading, refetch: () => { void refetch(); }, error };
 }

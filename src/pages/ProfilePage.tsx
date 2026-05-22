@@ -33,7 +33,7 @@ export function ProfilePage() {
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">
-      <div className="space-y-4 p-4 pb-8">
+      <div className="mx-auto w-full max-w-[480px] space-y-4 px-4 pb-8 pt-4">
 
         <Card className="py-0">
           <CardContent className="flex items-center gap-4 p-4">
@@ -92,7 +92,7 @@ export function ProfilePage() {
               <div className="mx-4 h-px bg-border" />
               <InfoRow
                 label={t('profile.field_email') ?? 'Email'}
-                value={agent?.email || (!noData ? (t('profile.field_not_set') ?? 'Not set') : undefined)}
+                value={agent?.email || (!noData ? '—' : undefined)}
                 loading={noData}
                 unset={agent ? !agent.email : false}
                 skeletonWidth="w-48"

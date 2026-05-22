@@ -48,7 +48,7 @@ function TemplateRow({ template, onClick }: TemplateRowProps) {
 }
 
 export function TemplatesPage() {
-  const { data: templates, isError, isLoading, refetch } = useTemplates();
+  const { data: templates, isError, isLoading, refetch, error } = useTemplates();
   const navigate = useNavigate();
   const t = useT();
 
@@ -57,7 +57,8 @@ export function TemplatesPage() {
   return (
     <div className="flex min-h-dvh flex-col bg-background">
 
-      <div className="sticky top-0 z-10 bg-background/80 px-4 pb-3 pt-4 backdrop-blur-md">
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md">
+        <div className="mx-auto max-w-[480px] px-4 pb-3 pt-4">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">{t('templates.page_title') ?? 'Reply templates'}</h1>
@@ -79,9 +80,10 @@ export function TemplatesPage() {
             <Plus className="h-4 w-4" />
           </Button>
         </div>
+        </div>
       </div>
 
-      <div className="px-4 pb-4">
+      <div className="mx-auto flex w-full max-w-[480px] flex-1 flex-col px-4 pb-4">
         {isLoading ? (
           <div className="space-y-0 overflow-hidden rounded-xl border bg-card">
             {Array.from({ length: 4 }).map((_, i) => (
@@ -92,7 +94,7 @@ export function TemplatesPage() {
             ))}
           </div>
         ) : isError ? (
-          <FetchError description={t('templates.load_error') ?? 'Failed to load the template list'} onRetry={refetch} />
+          <FetchError description={t('templates.load_error') ?? 'Failed to load the template list'} onRetry={refetch} error={error} />
         ) : templates.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted-foreground">{t('templates.empty') ?? 'No templates'}</p>
         ) : (

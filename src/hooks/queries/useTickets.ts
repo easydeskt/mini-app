@@ -38,11 +38,11 @@ export function toTicket(t: ApiTicketResponse): Ticket {
   };
 }
 
-export function useTickets(): { data: Ticket[]; isError: boolean; isLoading: boolean; refetch: () => void } {
-  const { data = [], isError, isLoading, refetch } = useQuery({
+export function useTickets(): { data: Ticket[]; isError: boolean; isLoading: boolean; refetch: () => void; error: unknown } {
+  const { data = [], isError, isLoading, refetch, error } = useQuery({
     queryKey: queryKeys.tickets.all,
     queryFn: () => fetchTickets(),
     retry: false,
   });
-  return { data: data.map(toTicket), isError, isLoading, refetch: () => { void refetch(); } };
+  return { data: data.map(toTicket), isError, isLoading, refetch: () => { void refetch(); }, error };
 }

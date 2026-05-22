@@ -70,7 +70,7 @@ function ChannelRowWithProvider({ channel, onClick }: ChannelRowWithProviderProp
 export function ChannelsPage() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const navigate = useNavigate();
-  const { data: channels, isError, isLoading, refetch } = useChannels();
+  const { data: channels, isError, isLoading, refetch, error } = useChannels();
   const t = useT();
 
   useBackButton();
@@ -88,7 +88,8 @@ export function ChannelsPage() {
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">
-      <div className="sticky top-0 z-10 bg-background/80 px-4 pb-3 pt-4 backdrop-blur-md">
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md">
+        <div className="mx-auto max-w-[480px] px-4 pb-3 pt-4">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">{t('channels.page_title') ?? 'Channels'}</h1>
@@ -108,9 +109,10 @@ export function ChannelsPage() {
             <Plus className="h-4 w-4" />
           </Button>
         </div>
+        </div>
       </div>
 
-      <div className="px-4 pb-8">
+      <div className="mx-auto flex w-full max-w-[480px] flex-1 flex-col px-4 pb-8">
         {isLoading ? (
           <div className="space-y-0 overflow-hidden rounded-xl border bg-card">
             {Array.from({ length: 3 }).map((_, i) => (
@@ -124,7 +126,7 @@ export function ChannelsPage() {
             ))}
           </div>
         ) : isError ? (
-          <FetchError description={t('channels.load_error') ?? 'Failed to load the channel list'} onRetry={refetch} />
+          <FetchError description={t('channels.load_error') ?? 'Failed to load the channel list'} onRetry={refetch} error={error} />
         ) : channels.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted-foreground">{t('channels.empty') ?? 'No channels'}</p>
         ) : (

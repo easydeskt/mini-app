@@ -15,13 +15,13 @@ function toChannel(c: ApiChannelResponse): Channel {
   };
 }
 
-export function useChannels(): { data: Channel[]; isError: boolean; isLoading: boolean; refetch: () => void } {
-  const { data = [], isError, isLoading, refetch } = useQuery({
+export function useChannels(): { data: Channel[]; isError: boolean; isLoading: boolean; refetch: () => void; error: unknown } {
+  const { data = [], isError, isLoading, refetch, error } = useQuery({
     queryKey: queryKeys.channels.list(false),
     queryFn: () => fetchChannels(false),
     retry: false,
   });
-  return { data: data.map(toChannel), isError, isLoading, refetch: () => { void refetch(); } };
+  return { data: data.map(toChannel), isError, isLoading, refetch: () => { void refetch(); }, error };
 }
 
 export function useChannel(id: number | undefined): { data: Channel | undefined; isLoading: boolean } {

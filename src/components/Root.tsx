@@ -1,6 +1,5 @@
-import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { initData } from '@telegram-apps/sdk-react';
-import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { createT } from '@/i18n';
@@ -13,23 +12,7 @@ function getLang() {
   return initData.user()?.language_code === 'ru' ? 'ru' : 'en';
 }
 
-const queryClient = new QueryClient({
-  queryCache: new QueryCache({
-    onError: (error) => {
-      const t = createT(getLang());
-      let toastId: string;
-      let message: string;
-      if (error instanceof TypeError) {
-        toastId = navigator.onLine ? 'server_unavailable' : 'network_error';
-        message = t(`common.${toastId}`) ?? error.message;
-      } else {
-        message = error instanceof Error ? error.message : String(error);
-        toastId = message;
-      }
-      toast.error(message, { id: toastId });
-    },
-  }),
-});
+const queryClient = new QueryClient();
 
 function ErrorBoundaryError({ error }: { error: unknown }) {
   const t = createT(getLang());

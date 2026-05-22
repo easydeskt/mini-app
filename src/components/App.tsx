@@ -14,9 +14,17 @@ export function App() {
   }, [isDark]);
 
   useEffect(() => {
-    if (miniApp.setHeaderColor.isAvailable()) miniApp.setHeaderColor('bg_color');
-    if (miniApp.setBackgroundColor.isAvailable()) miniApp.setBackgroundColor('bg_color');
-    if (miniApp.setBottomBarColor.isAvailable()) miniApp.setBottomBarColor('bg_color');
+    const raw = getComputedStyle(document.documentElement).getPropertyValue('--background-hex').trim();
+    const color: `#${string}` | 'bg_color' = raw.startsWith('#') ? (raw as `#${string}`) : 'bg_color';
+    if (miniApp.setHeaderColor.isAvailable()) {
+      try { miniApp.setHeaderColor(color); } catch { miniApp.setHeaderColor('bg_color'); }
+    }
+    if (miniApp.setBackgroundColor.isAvailable()) {
+      try { miniApp.setBackgroundColor(color); } catch { miniApp.setBackgroundColor('bg_color'); }
+    }
+    if (miniApp.setBottomBarColor.isAvailable()) {
+      try { miniApp.setBottomBarColor(color); } catch { miniApp.setBottomBarColor('bg_color'); }
+    }
   }, [isDark]);
 
   return (

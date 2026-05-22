@@ -65,7 +65,7 @@ function AgentRow({ agent, onClick, onEdit }: AgentRowProps) {
 
 export function AgentsPage() {
   const navigate = useNavigate();
-  const { data: agents, isError: agentsError, isLoading: agentsLoading, refetch: refetchAgents } = useAgents();
+  const { data: agents, isError: agentsError, isLoading: agentsLoading, refetch: refetchAgents, error: agentsFetchError } = useAgents();
   const { data: currentAgent, isLoading: currentAgentLoading } = useCurrentAgent();
   const t = useT();
 
@@ -85,7 +85,8 @@ export function AgentsPage() {
   return (
     <div className="flex min-h-dvh flex-col bg-background">
 
-      <div className="sticky top-0 z-10 bg-background/80 px-4 pb-3 pt-4 backdrop-blur-md">
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md">
+        <div className="mx-auto max-w-[480px] px-4 pb-3 pt-4">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">{t('agents.page_title') ?? 'Agents'}</h1>
@@ -105,9 +106,10 @@ export function AgentsPage() {
             <UserPlus className="h-4 w-4" />
           </Button>
         </div>
+        </div>
       </div>
 
-      <div className="space-y-4 px-4 pb-8">
+      <div className="mx-auto flex w-full max-w-[480px] flex-1 flex-col space-y-4 px-4 pb-8">
         {isLoading ? (
           <div className="space-y-0 overflow-hidden rounded-xl border bg-card">
             {Array.from({ length: 4 }).map((_, i) => (
@@ -121,7 +123,7 @@ export function AgentsPage() {
             ))}
           </div>
         ) : agentsError ? (
-          <FetchError description={t('agents.load_error') ?? 'Failed to load the agent list'} onRetry={refetchAgents} />
+          <FetchError description={t('agents.load_error') ?? 'Failed to load the agent list'} onRetry={refetchAgents} error={agentsFetchError} />
         ) : (
           <>
             {admins.length > 0 && (

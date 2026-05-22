@@ -1,7 +1,6 @@
 import { useState } from 'react';
 
 import {
-  ArrowLeft,
   Check,
   CircleQuestionMark,
   CircleX,
@@ -19,7 +18,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useNavigate, useParams } from 'react-router';
+import { useParams } from 'react-router';
 
 import { ActivityLine } from '@/components/ticket/ActivityLine';
 import { HistoryTimeline } from '@/components/ticket/HistoryTimeline';
@@ -71,11 +70,10 @@ import type { TicketPriority } from '@/types/ticket';
 export function TicketDetailPage() {
   const { id } = useParams<{ id: string }>();
   const ticketId = Number(id);
-  const navigate = useNavigate();
   const t = useT();
   useBackButton();
 
-  const { data: ticket, isError, isLoading, refetch } = useTicket(ticketId);
+  const { data: ticket, isError, isLoading, refetch, error } = useTicket(ticketId);
   const { data: assignedAgent } = useAgent(ticket?.assignedAgentId ?? undefined);
   const { data: currentAgent } = useCurrentAgent();
   const queryClient = useQueryClient();
@@ -96,13 +94,11 @@ export function TicketDetailPage() {
   const assignMutation = useMutation({
     mutationFn: () => assignTicket(ticketId, currentAgent!.id),
     onSuccess: () => { invalidate(); toast.success(t('tickets.toast_assigned')); },
-    onError: () => toast.error(t('tickets.toast_assign_error')),
   });
 
   const freeMutation = useMutation({
     mutationFn: () => freeTicket(ticketId),
     onSuccess: () => { invalidate(); toast.success(t('tickets.toast_freed')); },
-    onError: () => toast.error(t('tickets.toast_free_error')),
   });
 
   const resolveMutation = useMutation({
@@ -111,43 +107,36 @@ export function TicketDetailPage() {
       await resolveTicket(ticketId);
     },
     onSuccess: () => { invalidate(); toast.success(t('tickets.toast_resolved')); setResolveSheetOpen(false); },
-    onError: () => toast.error(t('tickets.toast_resolve_error')),
   });
 
   const reopenMutation = useMutation({
     mutationFn: () => reopenTicket(ticketId),
     onSuccess: () => { invalidate(); toast.success(t('tickets.toast_reopened')); },
-    onError: () => toast.error(t('tickets.toast_reopen_error')),
   });
 
   const assignToMutation = useMutation({
     mutationFn: (agentId: string) => assignTicket(ticketId, agentId),
     onSuccess: () => { invalidate(); toast.success(t('tickets.toast_agent_assigned')); },
-    onError: () => toast.error(t('tickets.toast_agent_assign_error')),
   });
 
   const setPriorityMutation = useMutation({
     mutationFn: (priority: string | null) => setTicketPriority(ticketId, priority),
     onSuccess: () => { invalidate(); toast.success(t('tickets.toast_priority_updated')); setPrioritySheetOpen(false); },
-    onError: () => toast.error(t('tickets.toast_priority_error')),
   });
 
   const setTagsMutation = useMutation({
     mutationFn: (tagIds: number[]) => setTicketTags(ticketId, tagIds),
     onSuccess: () => { invalidate(); toast.success(t('tickets.toast_tags_updated')); setTagsSheetOpen(false); },
-    onError: () => toast.error(t('tickets.toast_tags_error')),
   });
 
   const mergeMutation = useMutation({
     mutationFn: (targetId: number) => mergeTickets(ticketId, targetId),
     onSuccess: () => { invalidate(); toast.success(t('tickets.toast_merged')); },
-    onError: () => toast.error(t('tickets.toast_merge_error')),
   });
 
   const closeMutation = useMutation({
     mutationFn: () => closeTicket(ticketId),
     onSuccess: () => { invalidate(); toast.success(t('tickets.toast_closed')); },
-    onError: () => toast.error(t('tickets.toast_close_error')),
   });
 
   const isAssignedToMe = !!currentAgent && ticket?.assignedAgentId === currentAgent.id;
@@ -165,25 +154,22 @@ export function TicketDetailPage() {
         <div className="fixed inset-0 z-40 bg-black/40 transition-opacity" />
       )}
 
-      <div className="shrink-0 z-10 flex items-center gap-2 border-b border-border bg-background/90 px-4 py-3 backdrop-blur-md">
-        <button
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-background"
-          onClick={() => void navigate(-1)}
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </button>
-        {isLoading ? (
-          <Skeleton className="mx-auto h-4 w-16" />
-        ) : (
-          <h1 className="flex-1 text-center text-base font-semibold tracking-[-0.2px]">
-            {ticket ? `${t('tickets.detail_title_prefix')}${ticket.id}` : t('tickets.detail_unknown')}
-          </h1>
-        )}
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md">
+        <div className="mx-auto max-w-[480px] px-4 pb-3 pt-4">
+          <div className="flex items-start justify-between gap-3">
+            {isLoading ? (
+              <Skeleton className="h-8 w-32" />
+            ) : (
+              <h1 className="text-2xl font-bold tracking-tight">
+                {ticket ? `${t('tickets.detail_title_prefix')}${ticket.id}` : t('tickets.detail_unknown')}
+              </h1>
+            )}
+            <div className="mt-0.5">
         <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
           <DropdownMenuTrigger asChild>
-            <button className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-background">
+            <Button variant="outline" size="icon" className="shrink-0 rounded-full">
               <MoreHorizontal className="h-4 w-4" />
-            </button>
+            </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="min-w-52" sideOffset={24}>
             <DropdownMenuGroup>
@@ -238,10 +224,13 @@ export function TicketDetailPage() {
             </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
-        <div className="space-y-3 px-4 pb-4 pt-4">
+      <div className="flex flex-1 flex-col overflow-y-auto">
+        <div className="mx-auto flex w-full max-w-[480px] flex-1 flex-col space-y-3 px-4 pb-4 pt-4">
         {isLoading && (
           <>
             <Skeleton className="h-40 w-full rounded-xl" />
@@ -254,6 +243,7 @@ export function TicketDetailPage() {
           <FetchError
             description={t('tickets.ticket_detail_load_error')}
             onRetry={refetch}
+            error={error}
           />
         )}
 
@@ -393,7 +383,8 @@ export function TicketDetailPage() {
 
       {/* Bottom action bar */}
       {hasActionBar && (
-        <div className="shrink-0 space-y-3 border-t border-border bg-background p-4">
+        <div className="shrink-0 border-t bg-background">
+          <div className="mx-auto max-w-[480px] space-y-3 p-4">
           {ticket!.status === 'OPEN' && (
             <Button
               variant="outline"
@@ -448,6 +439,7 @@ export function TicketDetailPage() {
               {t('tickets.ticket_detail_open_in_telegram')}
             </button>
           )}
+          </div>
         </div>
       )}
 

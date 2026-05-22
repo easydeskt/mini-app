@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { ArrowLeft, MonitorSmartphone } from 'lucide-react';
+import { MonitorSmartphone } from 'lucide-react';
 import { useNavigate, useParams, useSearchParams } from 'react-router';
 
 import { ChannelConfigSection } from '@/components/admin/ChannelConfigSection';
@@ -86,25 +86,16 @@ export function ChannelEditPage() {
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">
-      <div className="sticky top-0 z-10 flex items-center gap-2 border-b bg-background/80 px-4 py-3 backdrop-blur-md">
-        <Button
-          variant="outline"
-          size="icon"
-          className="shrink-0 rounded-full"
-          onClick={() => void navigate(-1)}
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <div className="flex flex-1 flex-col items-center">
-          <h1 className="text-base font-semibold leading-tight">
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md">
+        <div className="mx-auto max-w-[480px] px-4 pb-3 pt-4">
+          <h1 className="text-2xl font-bold tracking-tight">
             {isNew ? (t('channels.edit_title_new') ?? 'New channel') : displayName || provider.name}
           </h1>
-          <p className="text-xs text-muted-foreground">{provider.name}</p>
+          <p className="text-sm text-muted-foreground">{provider.name}</p>
         </div>
-        <div className="size-9 shrink-0" />
       </div>
 
-      <div className="flex flex-1 flex-col gap-3 px-4 py-3">
+      <div className="mx-auto w-full max-w-[480px] flex flex-1 flex-col gap-3 px-4 py-3">
         {provider.configSchema.map(section => (
           <ChannelConfigSection
             key={section.key}
@@ -116,7 +107,8 @@ export function ChannelEditPage() {
         ))}
       </div>
 
-      <div className="sticky bottom-0 z-10 flex flex-col gap-3 border-t bg-background/80 px-4 pb-6 pt-3 backdrop-blur-md">
+      <div className="sticky bottom-0 z-10 border-t bg-background/80 backdrop-blur-md">
+        <div className="mx-auto max-w-[480px] flex flex-col gap-3 px-4 pb-6 pt-3">
         <InputGroup>
           <InputGroupAddon>
             <MonitorSmartphone className="size-4" />
@@ -138,6 +130,7 @@ export function ChannelEditPage() {
         <Button className="w-full" onClick={handleSave}>
           {t('channels.edit_save') ?? 'Save'}
         </Button>
+        </div>
       </div>
     </div>
   );

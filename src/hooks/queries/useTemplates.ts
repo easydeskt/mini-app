@@ -14,13 +14,13 @@ function toTemplate(t: ApiTemplateResponse): ReplyTemplate {
   };
 }
 
-export function useTemplates(): { data: ReplyTemplate[]; isError: boolean; isLoading: boolean; refetch: () => void } {
-  const { data = [], isError, isLoading, refetch } = useQuery({
+export function useTemplates(): { data: ReplyTemplate[]; isError: boolean; isLoading: boolean; refetch: () => void; error: unknown } {
+  const { data = [], isError, isLoading, refetch, error } = useQuery({
     queryKey: queryKeys.templates.all,
     queryFn: fetchTemplates,
     retry: false,
   });
-  return { data: data.map(toTemplate), isError, isLoading, refetch: () => { void refetch(); } };
+  return { data: data.map(toTemplate), isError, isLoading, refetch: () => { void refetch(); }, error };
 }
 
 export function useTemplate(id: number): { data: ReplyTemplate | undefined; isLoading: boolean } {

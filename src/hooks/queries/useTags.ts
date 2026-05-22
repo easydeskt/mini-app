@@ -12,11 +12,11 @@ export function toTag(t: ApiTagResponse): Tag {
   };
 }
 
-export function useTags(): { data: Tag[]; isError: boolean; isLoading: boolean; refetch: () => void } {
-  const { data = [], isError, isLoading, refetch } = useQuery({
+export function useTags(): { data: Tag[]; isError: boolean; isLoading: boolean; refetch: () => void; error: unknown } {
+  const { data = [], isError, isLoading, refetch, error } = useQuery({
     queryKey: queryKeys.tags.all,
     queryFn: fetchTags,
     retry: false,
   });
-  return { data: data.map(toTag), isError, isLoading, refetch: () => { void refetch(); } };
+  return { data: data.map(toTag), isError, isLoading, refetch: () => { void refetch(); }, error };
 }

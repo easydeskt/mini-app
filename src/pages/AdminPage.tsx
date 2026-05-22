@@ -33,18 +33,15 @@ export function AdminPage() {
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">
-      <div className="sticky top-0 z-10 bg-background/80 px-4 pb-3 pt-4 backdrop-blur-md">
-        {isLoading ? (
-          <Skeleton className="h-9 w-32" />
-        ) : (
-          <>
-            <h1 className="text-3xl font-bold tracking-tight">{agent?.workspace ?? 'EasyDesk'}</h1>
-            <p className="text-sm text-muted-foreground">{t('admin.page_title') ?? 'Workspace management'}</p>
-          </>
-        )}
-      </div>
-
-      <div className="space-y-4 px-4 pb-8">
+      <div className="mx-auto w-full max-w-120 space-y-4 px-4 pb-8 pt-4">
+        <div>
+          {isLoading ? (
+            <Skeleton className="h-8 w-40" />
+          ) : (
+            <h1 className="text-2xl font-bold tracking-tight">{agent?.workspace ?? 'EasyDesk'}</h1>
+          )}
+          <p className="mt-0.5 text-sm text-muted-foreground">{t('admin.page_title') ?? 'Workspace management'}</p>
+        </div>
         {isLoading ? (
           <div className="grid grid-cols-2 gap-2">
             {Array.from({ length: 4 }).map((_, i) => (
@@ -104,6 +101,8 @@ export function AdminPage() {
           </Card>
         </div>
       </div>
+
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 h-8 bg-linear-to-t from-background to-transparent" />
     </div>
   );
 }

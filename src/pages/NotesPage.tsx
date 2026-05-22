@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
 
-import { AlertTriangle, ArrowLeft, Plus, Search, X } from 'lucide-react';
-import { useNavigate, useParams } from 'react-router';
+import { AlertTriangle, Plus, Search, X } from 'lucide-react';
+import { useParams } from 'react-router';
 
 import { NoteCard } from '@/components/ticket/NoteCard';
 import { NoteEditSheet } from '@/components/NoteEditSheet';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { FetchError } from '@/components/ui/list-error';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -19,7 +20,6 @@ type NoteFilter = 'all' | 'client' | 'ticket';
 export function NotesPage() {
   const { id } = useParams<{ id: string }>();
   const ticketId = Number(id);
-  const navigate = useNavigate();
   const t = useT();
   const [activeFilter, setActiveFilter] = useState<NoteFilter>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -36,7 +36,7 @@ export function NotesPage() {
   ];
 
   const hasTicketContext = !isNaN(ticketId) && ticketId > 0;
-  const { data: ticket, isError, isLoading, refetch } = useTicket(ticketId);
+  const { data: ticket, isError, isLoading, refetch, error } = useTicket(ticketId);
 
   const notes = ticket?.notes ?? [];
 
@@ -62,24 +62,27 @@ export function NotesPage() {
   return (
     <>
       <div className="flex min-h-dvh flex-col bg-background">
-        <div className="sticky top-0 z-10 flex items-center gap-2 border-b border-border bg-background/90 px-4 py-3 backdrop-blur-md">
-          <button
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-background"
-            onClick={() => void navigate(-1)}
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </button>
-          <h1 className="flex-1 text-center text-base font-semibold tracking-[-0.2px]">{t('notes.page_title')}</h1>
-          <button
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-background"
-            onClick={() => setCreateOpen(true)}
-          >
-            <Plus className="h-4 w-4" />
-          </button>
+        <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md">
+          <div className="mx-auto max-w-[480px] px-4 pb-3 pt-4">
+            <div className="flex items-start justify-between gap-3">
+              <h1 className="text-2xl font-bold tracking-tight">{t('notes.page_title')}</h1>
+              <div className="mt-0.5">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="shrink-0 rounded-full"
+                  onClick={() => setCreateOpen(true)}
+                  aria-label={t('notes.create') ?? 'Create note'}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
 
         {showControls && (
-          <div className="space-y-2 px-4 pb-2 pt-3">
+          <div className="mx-auto w-full max-w-[480px] space-y-2 px-4 pb-2 pt-3">
             <div className="relative">
               <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -112,7 +115,7 @@ export function NotesPage() {
           </div>
         )}
 
-        <div className="flex-1 space-y-2 px-4 pb-4 pt-2">
+        <div className="mx-auto flex w-full max-w-[480px] flex-1 flex-col space-y-2 px-4 pb-4 pt-2">
           {isLoading && (
             <>
               <NoteCardSkeleton />
@@ -122,7 +125,7 @@ export function NotesPage() {
           )}
 
           {!isLoading && isError && (
-            <FetchError description={t('notes.load_error')} onRetry={refetch} />
+            <FetchError description={t('notes.load_error')} onRetry={refetch} error={error} />
           )}
 
           {showTicketWarning && (

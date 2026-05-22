@@ -13,7 +13,7 @@ import {
 } from '@dnd-kit/core';
 import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { ArrowLeft, GripVertical, LifeBuoy, MessageCircleMore, MoreVertical, Trash2 } from 'lucide-react';
+import { GripVertical, LifeBuoy, MessageCircleMore, MoreVertical, Trash2 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router';
 
 import { AttachmentPreviewOverlay, type PreviewableAttachment, type PreviewState } from '@/components/admin/AttachmentPreviewOverlay';
@@ -203,40 +203,38 @@ export function TemplateEditPage() {
         <div className="fixed inset-0 z-40 bg-black/40 transition-opacity" />
       )}
 
-      <div className="sticky top-0 z-10 flex items-center gap-2 border-b bg-background/80 px-4 py-3 backdrop-blur-md">
-        <Button
-          variant="outline"
-          size="icon"
-          className="shrink-0 rounded-full"
-          onClick={() => void navigate(-1)}
-        >
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <h1 className="flex-1 text-center text-base font-semibold">
-          {isNew ? (t('templates.edit_title_new') ?? 'Create template') : (t('templates.edit_title_edit') ?? 'Edit template')}
-        </h1>
-        <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="icon" className="shrink-0 rounded-full">
-              <MoreVertical className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" sideOffset={24}>
-            <DropdownMenuItem onClick={() => setHelpOpen(true)}>
-              <LifeBuoy />
-              {t('templates.edit_menu_how') ?? 'How does it work?'}
-            </DropdownMenuItem>
-            {!isNew && (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive" onClick={() => setDeleteOpen(true)}>
-                  <Trash2 />
-                  {t('templates.edit_menu_delete') ?? 'Delete template'}
-                </DropdownMenuItem>
-              </>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
+      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md">
+        <div className="mx-auto max-w-[480px] px-4 pb-3 pt-4">
+          <div className="flex items-start justify-between gap-3">
+            <h1 className="text-2xl font-bold tracking-tight">
+              {isNew ? (t('templates.edit_title_new') ?? 'Create template') : (t('templates.edit_title_edit') ?? 'Edit template')}
+            </h1>
+            <div className="mt-0.5">
+              <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon" className="shrink-0 rounded-full">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" sideOffset={24}>
+                  <DropdownMenuItem onClick={() => setHelpOpen(true)}>
+                    <LifeBuoy />
+                    {t('templates.edit_menu_how') ?? 'How does it work?'}
+                  </DropdownMenuItem>
+                  {!isNew && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem variant="destructive" onClick={() => setDeleteOpen(true)}>
+                        <Trash2 />
+                        {t('templates.edit_menu_delete') ?? 'Delete template'}
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div ref={scrollRef} className="flex flex-1 flex-col">
@@ -297,7 +295,8 @@ export function TemplateEditPage() {
         )}
       </div>
 
-      <div className="sticky bottom-0 z-10 flex flex-col gap-3 border-t bg-background/80 px-4 pb-6 pt-3 backdrop-blur-md">
+      <div className="sticky bottom-0 z-10 border-t bg-background/80 backdrop-blur-md">
+        <div className="mx-auto max-w-[480px] flex flex-col gap-3 px-4 pb-6 pt-3">
         <InputGroup>
           <InputGroupAddon>
             <MessageCircleMore className="h-4 w-4" />
@@ -323,6 +322,7 @@ export function TemplateEditPage() {
         >
           {t('templates.edit_save') ?? 'Save'}
         </Button>
+        </div>
       </div>
 
       <AlertDialog open={helpOpen} onOpenChange={setHelpOpen}>
