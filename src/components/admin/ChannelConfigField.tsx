@@ -21,10 +21,11 @@ type ChannelConfigFieldProps = {
 
 export function ChannelConfigField({ brand, field, fieldId, sectionKey, value, onChange }: ChannelConfigFieldProps) {
   const [showPassword, setShowPassword] = useState(false);
-  const { fieldLabel, fieldDescription } = useChannelT(brand);
+  const { fieldLabel, fieldPlaceholder, fieldDescription } = useChannelT(brand);
 
   const label = fieldLabel(sectionKey, field.key);
   const description = fieldDescription(sectionKey, field.key);
+  const placeholder = fieldPlaceholder(sectionKey, field.key) ?? field.placeholder;
 
   if (field.type === 'switch') {
     return (
@@ -77,7 +78,7 @@ export function ChannelConfigField({ brand, field, fieldId, sectionKey, value, o
             id={fieldId}
             type={showPassword ? 'text' : 'password'}
             value={String(value ?? '')}
-            placeholder={field.placeholder}
+            placeholder={placeholder}
             onChange={e => onChange(e.target.value)}
             required={field.required}
             className="pr-10"
@@ -113,7 +114,7 @@ export function ChannelConfigField({ brand, field, fieldId, sectionKey, value, o
           id={fieldId}
           type="number"
           value={String(value ?? '')}
-          placeholder={field.placeholder}
+          placeholder={placeholder}
           onChange={e => onChange(e.target.value === '' ? '' : Number(e.target.value))}
           required={field.required}
           className="w-24 shrink-0 text-right"
@@ -136,7 +137,7 @@ export function ChannelConfigField({ brand, field, fieldId, sectionKey, value, o
           id={fieldId}
           type="number"
           value={String(value ?? '')}
-          placeholder={field.placeholder}
+          placeholder={placeholder}
           onChange={e => onChange(e.target.value === '' ? '' : Number(e.target.value))}
           required={field.required}
         />
@@ -157,7 +158,7 @@ export function ChannelConfigField({ brand, field, fieldId, sectionKey, value, o
         id={fieldId}
         type={field.type === 'url' ? 'url' : 'text'}
         value={String(value ?? '')}
-        placeholder={field.placeholder}
+        placeholder={placeholder}
         onChange={e => onChange(e.target.value)}
         required={field.required}
       />

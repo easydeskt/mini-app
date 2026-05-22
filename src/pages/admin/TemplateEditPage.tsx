@@ -55,7 +55,7 @@ function BubbleContent({ block, onPreview }: { block: MessageBlock; onPreview?: 
   );
 
   return (
-    <div className="overflow-hidden rounded-2xl rounded-tr-sm bg-secondary text-secondary-foreground">
+    <div className="w-fit max-w-full overflow-hidden rounded-2xl rounded-tr-sm bg-secondary text-secondary-foreground">
       {hasVisualMedia && <MediaGrid attachments={visualMedia} onPreview={onPreview} />}
       {!hasVisualMedia && nonVisual.length > 0 && <MediaGrid attachments={nonVisual} onPreview={onPreview} />}
       {block.text.trim() && (
@@ -83,7 +83,7 @@ function SortableTemplateBubble({ block, showGrip, onClick, onPreview }: Sortabl
       className="flex cursor-pointer justify-end"
       onClick={onClick}
     >
-      <div className="flex w-[90%] items-start gap-2">
+      <div className="flex w-[90%] items-start justify-end gap-2">
         {showGrip && (
           <button
             type="button"
@@ -101,7 +101,7 @@ function SortableTemplateBubble({ block, showGrip, onClick, onPreview }: Sortabl
           tabIndex={0}
           onClick={e => { e.stopPropagation(); onClick(); }}
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); }}
-          className="block min-w-0 flex-1 cursor-pointer text-left outline-none"
+          className="min-w-0 cursor-pointer text-left outline-none"
         >
           <BubbleContent block={block} onPreview={onPreview} />
         </div>
@@ -251,7 +251,7 @@ export function TemplateEditPage() {
         ) : (
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
             <SortableContext items={blocks.map(b => b.id)} strategy={verticalListSortingStrategy}>
-              <div className="mt-auto flex flex-col gap-3 px-4 py-4">
+              <div className="mx-auto mt-auto w-full max-w-[480px] flex flex-col gap-3 px-4 py-4">
                 {blocks.map(block => (
                   <SortableTemplateBubble
                     key={block.id}
@@ -279,8 +279,8 @@ export function TemplateEditPage() {
             </SortableContext>
             <DragOverlay dropAnimation={null}>
               {activeBlock && (
-                <div className="flex justify-end px-4">
-                  <div className="flex w-[90%] items-start gap-2 opacity-90">
+                <div className="mx-auto w-full max-w-[480px] flex justify-end px-4">
+                  <div className="flex w-[90%] items-start justify-end gap-2 opacity-90">
                     {blocks.length > 1 && (
                       <div className="mt-3.5 w-4 shrink-0" />
                     )}
@@ -318,7 +318,7 @@ export function TemplateEditPage() {
         <Button
           className="w-full"
           onClick={handleSave}
-          disabled={name.trim() === '' && blocks.length === 0}
+          disabled={!name.trim()}
         >
           {t('templates.edit_save') ?? 'Save'}
         </Button>

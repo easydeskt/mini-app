@@ -6,8 +6,13 @@ import { useNavigate } from 'react-router';
 import { InfoRow } from '@/components/shared/InfoRow';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useBackButton } from '@/hooks/useBackButton';
+import { pluralizeRu } from '@/utils/formatters';
+import { useAgents } from '@/hooks/queries/useAgents';
+import { useChannels } from '@/hooks/queries/useChannels';
 import { useCurrentAgent } from '@/hooks/queries/useCurrentAgent';
+import { useTags } from '@/hooks/queries/useTags';
+import { useTemplates } from '@/hooks/queries/useTemplates';
+import { useBackButton } from '@/hooks/useBackButton';
 import { useT } from '@/hooks/useT';
 import { useWorkspaceStats } from '@/hooks/queries/useWorkspaceStats';
 
@@ -21,15 +26,36 @@ const MGMT_ROUTES = [
   { icon: MonitorSmartphone, key: 'nav_channels', route: '/admin/channels' },
 ] as const;
 
+type NavKey = (typeof MGMT_ROUTES)[number]['key'];
+
 export function AdminPage() {
   const navigate = useNavigate();
   const { data: agent, isLoading: agentLoading } = useCurrentAgent();
   const { data: stats, isLoading: statsLoading } = useWorkspaceStats();
+  const { data: agents, isLoading: agentsLoading } = useAgents();
+  const { data: tags, isLoading: tagsLoading } = useTags();
+  const { data: templates, isLoading: templatesLoading } = useTemplates();
+  const { data: channels, isLoading: channelsLoading } = useChannels();
   const t = useT();
 
   useBackButton();
 
   const isLoading = agentLoading || statsLoading;
+
+  const sublabels: Record<NavKey, string | undefined> = {
+    nav_agents: agentsLoading ? undefined : agents.length === 0
+      ? t('admin.nav_agents_empty')
+      : pluralizeRu(agents.length, t('agents.count_one'), t('agents.count_few'), t('agents.count_many')),
+    nav_tags: tagsLoading ? undefined : tags.length === 0
+      ? t('admin.nav_tags_empty')
+      : pluralizeRu(tags.length, t('tags.count_one'), t('tags.count_few'), t('tags.count_many')),
+    nav_templates: templatesLoading ? undefined : templates.length === 0
+      ? t('admin.nav_templates_empty')
+      : pluralizeRu(templates.length, t('templates.count_one'), t('templates.count_few'), t('templates.count_many')),
+    nav_channels: channelsLoading ? undefined : channels.length === 0
+      ? t('admin.nav_channels_empty')
+      : pluralizeRu(channels.length, t('channels.count_one'), t('channels.count_few'), t('channels.count_many')),
+  };
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">
@@ -79,6 +105,7 @@ export function AdminPage() {
                     <NavRow
                       icon={<item.icon className="h-4 w-4" />}
                       label={t(`admin.${item.key}`) ?? item.key}
+                      sublabel={sublabels[item.key]}
                       onClick={() => { void navigate(item.route); }}
                     />
                   </div>
@@ -123,10 +150,11 @@ function StatCard({ value, label }: StatCardProps) {
 type NavRowProps = {
   icon: ReactNode;
   label: string;
+  sublabel?: string;
   onClick: () => void;
 };
 
-function NavRow({ icon, label, onClick }: NavRowProps) {
+function NavRow({ icon, label, sublabel, onClick }: NavRowProps) {
   return (
     <button
       type="button"
@@ -138,6 +166,9 @@ function NavRow({ icon, label, onClick }: NavRowProps) {
       </span>
       <span className="min-w-0 flex-1">
         <span className="block text-sm">{label}</span>
+        {sublabel !== undefined && (
+          <span className="block text-xs text-muted-foreground">{sublabel}</span>
+        )}
       </span>
       <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
     </button>

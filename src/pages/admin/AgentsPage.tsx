@@ -15,6 +15,7 @@ import { useAgents } from '@/hooks/queries/useAgents';
 import { useBackButton } from '@/hooks/useBackButton';
 import { useCurrentAgent } from '@/hooks/queries/useCurrentAgent';
 import { useT } from '@/hooks/useT';
+import { pluralizeRu } from '@/utils/formatters';
 import type { Agent } from '@/types/agent';
 
 type AgentSectionProps = { title: string; children: React.ReactNode };
@@ -92,9 +93,9 @@ export function AgentsPage() {
             <h1 className="text-3xl font-bold tracking-tight">{t('agents.page_title') ?? 'Agents'}</h1>
             {isLoading ? (
               <Skeleton className="mt-1 h-4 w-24" />
-            ) : (
-              <p className="text-sm text-muted-foreground">{agents.length} {t('agents.subtitle_team') ?? 'agents in team'}</p>
-            )}
+            ) : agents.length > 0 ? (
+              <p className="text-sm text-muted-foreground">{pluralizeRu(agents.length, t('agents.count_one'), t('agents.count_few'), t('agents.count_many'))}</p>
+            ) : null}
           </div>
           <Button
             variant="outline"

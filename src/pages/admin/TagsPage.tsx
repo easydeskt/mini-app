@@ -7,11 +7,13 @@ import { TagCreateSheet } from '@/components/admin/TagCreateSheet';
 import { TagEditSheet } from '@/components/admin/TagEditSheet';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { FetchError } from '@/components/ui/list-error';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBackButton } from '@/hooks/useBackButton';
 import { useTags } from '@/hooks/queries/useTags';
 import { useT } from '@/hooks/useT';
+import { pluralizeRu } from '@/utils/formatters';
 import type { Tag } from '@/types/tag';
 import { rgbaIntToCss } from '@/utils/color';
 
@@ -59,6 +61,11 @@ export function TagsPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">{t('tags.page_title') ?? 'Tags'}</h1>
+            {isLoading ? (
+              <Skeleton className="mt-1 h-4 w-16" />
+            ) : tags.length > 0 ? (
+              <p className="text-sm text-muted-foreground">{pluralizeRu(tags.length, t('tags.count_one'), t('tags.count_few'), t('tags.count_many'))}</p>
+            ) : null}
           </div>
           <Button
             variant="outline"
@@ -86,7 +93,16 @@ export function TagsPage() {
         ) : isError ? (
           <FetchError description={t('tags.load_error') ?? 'Failed to load the tag list'} onRetry={refetch} error={error} />
         ) : tags.length === 0 ? (
-          <p className="py-8 text-center text-sm text-muted-foreground">{t('tags.empty') ?? 'No tags'}</p>
+          <Empty className="border-none">
+            <EmptyHeader>
+              <EmptyMedia variant="icon"><Plus /></EmptyMedia>
+              <EmptyTitle>{t('tags.empty_title')}</EmptyTitle>
+              <EmptyDescription>{t('tags.empty_description')}</EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <Button size="sm" onClick={() => setCreateOpen(true)}>{t('tags.create')}</Button>
+            </EmptyContent>
+          </Empty>
         ) : (
           <Card className="py-0">
             <CardContent className="p-0">

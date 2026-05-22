@@ -6,12 +6,14 @@ import { useNavigate } from 'react-router';
 import { ChannelTypePickerSheet } from '@/components/admin/ChannelTypePickerSheet';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { FetchError } from '@/components/ui/list-error';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBackButton } from '@/hooks/useBackButton';
 import { useChannelProvider } from '@/hooks/useChannelProviders';
 import { useChannels } from '@/hooks/queries/useChannels';
 import { useT } from '@/hooks/useT';
+import { pluralizeRu } from '@/utils/formatters';
 import type { Channel, ChannelProviderInfo } from '@/types/channel';
 
 type ChannelRowProps = {
@@ -95,9 +97,9 @@ export function ChannelsPage() {
             <h1 className="text-3xl font-bold tracking-tight">{t('channels.page_title') ?? 'Channels'}</h1>
             {isLoading ? (
               <Skeleton className="mt-1 h-4 w-20" />
-            ) : (
-              <p className="text-sm text-muted-foreground">{activeChannels.length} {t('channels.subtitle_active') ?? 'active'}</p>
-            )}
+            ) : channels.length > 0 ? (
+              <p className="text-sm text-muted-foreground">{pluralizeRu(channels.length, t('channels.count_one'), t('channels.count_few'), t('channels.count_many'))}</p>
+            ) : null}
           </div>
           <Button
             variant="outline"
@@ -128,7 +130,16 @@ export function ChannelsPage() {
         ) : isError ? (
           <FetchError description={t('channels.load_error') ?? 'Failed to load the channel list'} onRetry={refetch} error={error} />
         ) : channels.length === 0 ? (
-          <p className="py-8 text-center text-sm text-muted-foreground">{t('channels.empty') ?? 'No channels'}</p>
+          <Empty className="border-none">
+            <EmptyHeader>
+              <EmptyMedia variant="icon"><Plus /></EmptyMedia>
+              <EmptyTitle>{t('channels.empty_title')}</EmptyTitle>
+              <EmptyDescription>{t('channels.empty_description')}</EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <Button size="sm" onClick={() => setPickerOpen(true)}>{t('channels.add')}</Button>
+            </EmptyContent>
+          </Empty>
         ) : (
           <div className="flex flex-col gap-6">
             {activeChannels.length > 0 && (

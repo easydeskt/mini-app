@@ -115,7 +115,7 @@ export function ChannelEditPage() {
           </InputGroupAddon>
           <InputGroupInput
             value={displayName}
-            placeholder={provider.name || (t('channels.edit_name_placeholder_fallback') ?? 'Channel name')}
+            placeholder={t('channels.edit_name_placeholder_fallback') ?? 'Channel name'}
             onChange={e => setDisplayName(e.target.value)}
           />
         </InputGroup>
@@ -127,7 +127,7 @@ export function ChannelEditPage() {
           <Switch checked={isEnabled} onCheckedChange={setIsEnabled} className="mt-0.5 shrink-0" />
         </div>
         <Separator />
-        <Button className="w-full" onClick={handleSave}>
+        <Button className="w-full" disabled={!displayName.trim()} onClick={handleSave}>
           {t('channels.edit_save') ?? 'Save'}
         </Button>
         </div>

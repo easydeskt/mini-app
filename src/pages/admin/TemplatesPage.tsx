@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { FetchError } from '@/components/ui/list-error';
 import { Skeleton } from '@/components/ui/skeleton';
 import { pluralizeRu } from '@/utils/formatters';
@@ -64,11 +65,11 @@ export function TemplatesPage() {
             <h1 className="text-3xl font-bold tracking-tight">{t('templates.page_title') ?? 'Reply templates'}</h1>
             {isLoading ? (
               <Skeleton className="mt-1 h-4 w-24" />
-            ) : (
+            ) : templates.length > 0 ? (
               <p className="text-sm text-muted-foreground">
-                {pluralizeRu(templates.length, t('templates.count_one') ?? 'template', t('templates.count_few') ?? 'templates', t('templates.count_many') ?? 'templates')}
+                {pluralizeRu(templates.length, t('templates.count_one'), t('templates.count_few'), t('templates.count_many'))}
               </p>
-            )}
+            ) : null}
           </div>
           <Button
             variant="outline"
@@ -96,7 +97,16 @@ export function TemplatesPage() {
         ) : isError ? (
           <FetchError description={t('templates.load_error') ?? 'Failed to load the template list'} onRetry={refetch} error={error} />
         ) : templates.length === 0 ? (
-          <p className="py-8 text-center text-sm text-muted-foreground">{t('templates.empty') ?? 'No templates'}</p>
+          <Empty className="border-none">
+            <EmptyHeader>
+              <EmptyMedia variant="icon"><Plus /></EmptyMedia>
+              <EmptyTitle>{t('templates.empty_title')}</EmptyTitle>
+              <EmptyDescription>{t('templates.empty_description')}</EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <Button size="sm" onClick={() => { void navigate('/admin/templates/new'); }}>{t('templates.create')}</Button>
+            </EmptyContent>
+          </Empty>
         ) : (
           <Card className="py-0">
             <CardContent className="p-0">
