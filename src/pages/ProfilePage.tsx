@@ -8,10 +8,7 @@ import { InfoRow } from '@/components/shared/InfoRow';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { ThemeSwitcher } from '@/components/kibo-ui/theme-switcher';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
-import { usePreferences, type Language } from '@/context/PreferencesContext';
 import { useBackButton } from '@/hooks/useBackButton';
 import { useCurrentAgent } from '@/hooks/queries/useCurrentAgent';
 import { useT } from '@/hooks/useT';
@@ -24,7 +21,6 @@ export function ProfilePage() {
 
   useBackButton();
 
-  const { language, theme, setLanguage, setTheme } = usePreferences();
   const t = useT();
 
   const ROLE_LABEL: Record<AgentRole, string> = {
@@ -109,37 +105,6 @@ export function ProfilePage() {
 
         <div>
           <p className="mb-1.5 px-4 text-xs font-medium uppercase tracking-widest text-muted-foreground">
-            {t('ui.preferences') ?? 'Preferences'}
-          </p>
-          <Card className="py-0">
-            <CardContent className="p-0">
-              <div className="flex items-center justify-between gap-4 px-4 py-2.5">
-                <span className="text-sm text-muted-foreground">{t('ui.language') ?? 'Language'}</span>
-                <Select value={language} onValueChange={v => setLanguage(v as Language)}>
-                  <SelectTrigger className="h-8 w-32 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ru">
-                      <span className="flex items-center gap-2"><FlagRu />{t('ui.lang_ru') ?? 'Русский'}</span>
-                    </SelectItem>
-                    <SelectItem value="en">
-                      <span className="flex items-center gap-2"><FlagUs />{t('ui.lang_en') ?? 'English'}</span>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="mx-4 h-px bg-border" />
-              <div className="flex items-center justify-between gap-4 px-4 py-2.5">
-                <span className="text-sm text-muted-foreground">{t('ui.theme') ?? 'Theme'}</span>
-                <ThemeSwitcher value={theme} onChange={setTheme} />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div>
-          <p className="mb-1.5 px-4 text-xs font-medium uppercase tracking-widest text-muted-foreground">
             {t('profile.section_workspace') ?? 'Workspace'}
           </p>
           <Card className="overflow-hidden py-0">
@@ -189,31 +154,6 @@ function StatCard({ value, label, icon, loading, skeletonWidth = 'w-10' }: StatC
         <span className="whitespace-pre-line text-xs leading-tight text-muted-foreground">{label}</span>
       </CardContent>
     </Card>
-  );
-}
-
-function FlagRu() {
-  return (
-    <svg width="20" height="14" viewBox="0 0 20 14" aria-hidden="true" className="shrink-0 rounded-[2px]">
-      <rect width="20" height="14" fill="#fff" />
-      <rect y="4.67" width="20" height="4.67" fill="#0036A6" />
-      <rect y="9.33" width="20" height="4.67" fill="#D52B1E" />
-    </svg>
-  );
-}
-
-function FlagUs() {
-  return (
-    <svg width="20" height="14" viewBox="0 0 20 14" aria-hidden="true" className="shrink-0 rounded-[2px]">
-      <rect width="20" height="14" fill="#B22234" />
-      <rect y="1.08" width="20" height="1.08" fill="#fff" />
-      <rect y="3.23" width="20" height="1.08" fill="#fff" />
-      <rect y="5.38" width="20" height="1.08" fill="#fff" />
-      <rect y="7.54" width="20" height="1.08" fill="#fff" />
-      <rect y="9.69" width="20" height="1.08" fill="#fff" />
-      <rect y="11.85" width="20" height="1.08" fill="#fff" />
-      <rect width="8" height="7.54" fill="#3C3B6E" />
-    </svg>
   );
 }
 

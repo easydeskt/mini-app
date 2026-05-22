@@ -1,7 +1,8 @@
+import { initData } from '@telegram-apps/sdk-react';
+
 import { createT } from '@/i18n';
-import { usePreferences } from '@/context/PreferencesContext';
 
 export function useT() {
-  const { language } = usePreferences();
-  return createT(language);
+  const lang = initData.user()?.language_code === 'ru' ? 'ru' : 'en';
+  return createT(lang);
 }

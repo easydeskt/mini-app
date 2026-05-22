@@ -1,9 +1,10 @@
-import { usePreferences } from '@/context/PreferencesContext';
+import { initData } from '@telegram-apps/sdk-react';
+
 import { createT } from '@/i18n';
 
 export function useChannelT(brand: string) {
-  const { language } = usePreferences();
-  const t = createT(language);
+  const lang = initData.user()?.language_code === 'ru' ? 'ru' : 'en';
+  const t = createT(lang);
   const sk = (key: string) => (!key || key === '__basic__' || key === '__extras__' ? 'root' : key);
 
   return {

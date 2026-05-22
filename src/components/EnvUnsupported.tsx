@@ -1,12 +1,11 @@
-import { createT, type Language } from '@/i18n';
+import { createT } from '@/i18n';
 
 type EnvUnsupportedProps = {
   error?: unknown;
 };
 
 export function EnvUnsupported({ error }: EnvUnsupportedProps) {
-  const lang = (localStorage.getItem('pref:language') as Language | null) ?? 'ru';
-  const t = createT(lang);
+  const t = createT('en');
 
   const errorText = error instanceof Error
     ? `${error.name}: ${error.message}`

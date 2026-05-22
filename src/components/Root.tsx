@@ -1,22 +1,22 @@
 import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { initData } from '@telegram-apps/sdk-react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
-import { PreferencesProvider, type Language } from '@/context/PreferencesContext';
-import { createT, type Language as I18nLanguage } from '@/i18n';
+import { createT } from '@/i18n';
 
 import { App } from 'src/components/App.tsx';
 import { ErrorBoundary } from 'src/components/ErrorBoundary.tsx';
 import { ErrorScreen } from 'src/components/ErrorScreen.tsx';
 
+function getLang() {
+  return initData.user()?.language_code === 'ru' ? 'ru' : 'en';
+}
+
 const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error) => {
-      const lang = (localStorage.getItem('pref:language') as Language | null) ?? 'ru';
-      const t = createT(lang);
-      // TypeError = fetch() itself threw: no internet or host unreachable.
-      // Plain Error = server responded with a non-2xx status; carry that message through.
-      // Use a stable id per error category so concurrent query failures collapse into one toast.
+      const t = createT(getLang());
       let toastId: string;
       let message: string;
       if (error instanceof TypeError) {
@@ -32,8 +32,7 @@ const queryClient = new QueryClient({
 });
 
 function ErrorBoundaryError({ error }: { error: unknown }) {
-  const lang = (localStorage.getItem('pref:language') as I18nLanguage | null) ?? 'ru';
-  const t = createT(lang);
+  const t = createT(getLang());
   const message =
     error instanceof Error
       ? error.message
@@ -55,9 +54,7 @@ export function Root() {
   return (
     <ErrorBoundary fallback={ErrorBoundaryError}>
       <QueryClientProvider client={queryClient}>
-        <PreferencesProvider>
-          <App />
-        </PreferencesProvider>
+        <App />
       </QueryClientProvider>
     </ErrorBoundary>
   );
