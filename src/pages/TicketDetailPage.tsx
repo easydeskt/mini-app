@@ -1,6 +1,5 @@
 import { useState } from 'react';
 
-import { SiTelegram } from '@icons-pack/react-simple-icons';
 import {
   ArrowLeft,
   Check,
@@ -60,7 +59,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { assignTicket, closeTicket, freeTicket, mergeTickets, reopenTicket, resolveTicket, setTicketAttributes, setTicketPriority, setTicketTags } from '@/api/tickets';
 import { queryKeys } from '@/api/query-keys';
 import { formatAttachmentCount } from '@/utils/formatters';
-import { PRIORITY_TEXT_COLOR, SourceIcon } from '@/utils/ticketDisplay';
+import { PRIORITY_TEXT_COLOR, SourceIcon, TelegramIcon } from '@/utils/ticketDisplay';
 import { useTicket } from '@/hooks/queries/useTicket';
 import { useAgent } from '@/hooks/queries/useAgent';
 import { useBackButton } from '@/hooks/useBackButton';
@@ -436,7 +435,7 @@ export function TicketDetailPage() {
               rel="noreferrer"
               className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-zinc-950 text-[14px] font-medium text-zinc-50 hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-950 dark:hover:bg-zinc-200"
             >
-              <SiTelegram className="h-4 w-4" />
+              <TelegramIcon className="h-4 w-4" />
               {t('tickets.ticket_detail_open_in_telegram')}
             </a>
           ) : (
@@ -445,7 +444,7 @@ export function TicketDetailPage() {
               aria-disabled="true"
               className="pointer-events-none flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-zinc-200 text-[14px] font-medium text-zinc-400 dark:bg-zinc-800 dark:text-zinc-600"
             >
-              <SiTelegram className="h-4 w-4" />
+              <TelegramIcon className="h-4 w-4" />
               {t('tickets.ticket_detail_open_in_telegram')}
             </button>
           )}
