@@ -29,12 +29,13 @@ import type { Agent } from '@/types/agent';
 
 type AgentEditSheetProps = {
   agent: Agent | null;
+  isOwner?: boolean;
   isSelf?: boolean;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
 
-export function AgentEditSheet({ agent, isSelf = false, open, onOpenChange }: AgentEditSheetProps) {
+export function AgentEditSheet({ agent, isOwner = false, isSelf = false, open, onOpenChange }: AgentEditSheetProps) {
   const [name, setName] = useState('');
   const [role, setRole] = useState<'ADMIN' | 'OPERATOR'>('OPERATOR');
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -84,7 +85,7 @@ export function AgentEditSheet({ agent, isSelf = false, open, onOpenChange }: Ag
               {t('agents.edit_sheet_title') ?? 'Edit agent'}
             </SheetTitle>
 
-            {!isSelf && (
+            {!isSelf && !isOwner && (
               <Button
                 variant="outline"
                 size="icon"
@@ -109,13 +110,19 @@ export function AgentEditSheet({ agent, isSelf = false, open, onOpenChange }: Ag
               </InputGroupAddon>
             </InputGroup>
 
-            {isSelf && (
+            {isOwner && (
+              <p className="rounded-lg border bg-muted/40 px-4 py-3 text-xs text-muted-foreground">
+                {t('agents.edit_role_owner_note')}
+              </p>
+            )}
+
+            {!isOwner && isSelf && (
               <p className="rounded-lg border bg-muted/40 px-4 py-3 text-xs text-muted-foreground">
                 {t('agents.edit_self_note')}
               </p>
             )}
 
-            {!isSelf && (
+            {!isOwner && !isSelf && (
               <RadioGroup
                 value={role}
                 onValueChange={v => setRole(v as 'ADMIN' | 'OPERATOR')}

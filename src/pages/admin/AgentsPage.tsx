@@ -1,30 +1,32 @@
 import { useState } from 'react';
 import React from 'react';
 
+import { initData, useSignal } from '@telegram-apps/sdk-react';
 import { UserPlus, UserRoundPen } from 'lucide-react';
 import { useNavigate } from 'react-router';
 
 import { AgentAddSheet } from '@/components/admin/AgentAddSheet';
 import { AgentEditSheet } from '@/components/admin/AgentEditSheet';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { FetchError } from '@/components/ui/list-error';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAgents } from '@/hooks/queries/useAgents';
-import { useBackButton } from '@/hooks/useBackButton';
 import { useCurrentAgent } from '@/hooks/queries/useCurrentAgent';
+import { useWorkspace } from '@/hooks/queries/useWorkspace';
+import { useBackButton } from '@/hooks/useBackButton';
 import { useT } from '@/hooks/useT';
 import type { Agent } from '@/types/agent';
 
-type AgentSectionProps = { title: string; count: number; children: React.ReactNode };
+type AgentSectionProps = { title: string; count?: number; children: React.ReactNode };
 
 function AgentSection({ title, count, children }: AgentSectionProps) {
   return (
     <div>
       <p className="mb-1.5 px-4 text-xs font-medium uppercase tracking-widest text-muted-foreground">
         {title}
-        <span className="font-normal"> • {count}</span>
+        {count !== undefined && <span className="font-normal"> • {count}</span>}
       </p>
       <Card className="py-0">
         <CardContent className="p-0">{children}</CardContent>
@@ -33,9 +35,9 @@ function AgentSection({ title, count, children }: AgentSectionProps) {
   );
 }
 
-type AgentRowProps = { agent: Agent; isSelf?: boolean; onClick: () => void; onEdit: () => void };
+type AgentRowProps = { agent: Agent; isSelf?: boolean; photoUrl?: string; onClick: () => void; onEdit: () => void };
 
-function AgentRow({ agent, isSelf, onClick, onEdit }: AgentRowProps) {
+function AgentRow({ agent, isSelf, photoUrl, onClick, onEdit }: AgentRowProps) {
   const t = useT();
   return (
     <div className="flex w-full items-stretch">
@@ -45,6 +47,7 @@ function AgentRow({ agent, isSelf, onClick, onEdit }: AgentRowProps) {
         className="flex flex-1 items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50 active:bg-muted"
       >
         <Avatar className="h-9 w-9">
+          {photoUrl && <AvatarImage src={photoUrl} />}
           <AvatarFallback className="text-sm">{agent.initials}</AvatarFallback>
         </Avatar>
         <div className="min-w-0 flex-1">
@@ -76,7 +79,13 @@ export function AgentsPage() {
   const navigate = useNavigate();
   const { data: agents, isError: agentsError, isLoading: agentsLoading, refetch: refetchAgents, error: agentsFetchError } = useAgents();
   const { data: currentAgent, isLoading: currentAgentLoading } = useCurrentAgent();
+  const { data: workspace } = useWorkspace();
+  const tgUser = useSignal(initData.user);
   const t = useT();
+
+  const tgUsername = tgUser?.username?.toLowerCase();
+  const photoUrlFor = (agent: Agent) =>
+    tgUsername && agent.username.toLowerCase() === tgUsername ? tgUser?.photo_url : undefined;
 
   const isLoading = agentsLoading || currentAgentLoading;
 
@@ -88,7 +97,9 @@ export function AgentsPage() {
 
   useBackButton();
 
-  const admins = agents.filter(a => a.role === 'ADMIN');
+  const superadminId = workspace?.superadmin_id ?? null;
+  const owner = superadminId ? agents.find(a => a.id === superadminId) : null;
+  const admins = agents.filter(a => a.role === 'ADMIN' && a.id !== superadminId);
   const operators = agents.filter(a => a.role === 'OPERATOR');
 
   return (
@@ -135,6 +146,18 @@ export function AgentsPage() {
           <FetchError description={t('agents.load_error') ?? 'Failed to load the agent list'} onRetry={refetchAgents} error={agentsFetchError} />
         ) : (
           <>
+            {owner && (
+              <AgentSection title={(t('agents.section_owner') ?? 'Owner').toUpperCase()}>
+                <AgentRow
+                  agent={owner}
+                  isSelf={owner.id === currentAgent?.id}
+                  photoUrl={photoUrlFor(owner)}
+                  onClick={() => { void navigate(agentUrl(owner.id)); }}
+                  onEdit={() => { setEditTarget(owner); setEditOpen(true); }}
+                />
+              </AgentSection>
+            )}
+
             {admins.length > 0 && (
               <AgentSection title={(t('agents.section_admins') ?? 'Admins').toUpperCase()} count={admins.length}>
                 {admins.map((agent, i) => (
@@ -143,6 +166,7 @@ export function AgentsPage() {
                     <AgentRow
                       agent={agent}
                       isSelf={agent.id === currentAgent?.id}
+                      photoUrl={photoUrlFor(agent)}
                       onClick={() => { void navigate(agentUrl(agent.id)); }}
                       onEdit={() => { setEditTarget(agent); setEditOpen(true); }}
                     />
@@ -151,27 +175,26 @@ export function AgentsPage() {
               </AgentSection>
             )}
 
-            <AgentSection title={(t('agents.section_operators') ?? 'Operators').toUpperCase()} count={operators.length}>
-              {operators.length === 0 ? (
-                <div className="px-4 py-3 text-sm text-muted-foreground">{t('agents.no_operators') ?? 'No operators'}</div>
-              ) : (
-                operators.map((agent, i) => (
+            {operators.length > 0 && (
+              <AgentSection title={(t('agents.section_operators') ?? 'Operators').toUpperCase()} count={operators.length}>
+                {operators.map((agent, i) => (
                   <React.Fragment key={agent.id}>
                     {i > 0 && <div className="mx-4 h-px bg-border" />}
                     <AgentRow
                       agent={agent}
+                      photoUrl={photoUrlFor(agent)}
                       onClick={() => { void navigate(agentUrl(agent.id)); }}
                       onEdit={() => { setEditTarget(agent); setEditOpen(true); }}
                     />
                   </React.Fragment>
-                ))
-              )}
-            </AgentSection>
+                ))}
+              </AgentSection>
+            )}
           </>
         )}
       </div>
 
-      <AgentEditSheet agent={editTarget} open={editOpen} onOpenChange={setEditOpen} isSelf={editTarget?.id === currentAgent?.id} />
+      <AgentEditSheet agent={editTarget} open={editOpen} onOpenChange={setEditOpen} isSelf={editTarget?.id === currentAgent?.id} isOwner={editTarget?.id === superadminId} />
       <AgentAddSheet open={inviteOpen} onOpenChange={setInviteOpen} />
 
     </div>
