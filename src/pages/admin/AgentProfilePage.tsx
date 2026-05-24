@@ -29,16 +29,6 @@ export function AgentProfilePage() {
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">
-      <div className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur-md">
-        <div className="mx-auto max-w-[480px] px-4 pb-3 pt-4">
-          {noData ? (
-            <Skeleton className="h-8 w-40" />
-          ) : (
-            <h1 className="text-2xl font-bold tracking-tight">{agent.name}</h1>
-          )}
-        </div>
-      </div>
-
       <div className="mx-auto w-full max-w-[480px] space-y-4 px-4 pb-8 pt-4">
 
         <Card className="py-0">

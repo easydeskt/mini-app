@@ -80,7 +80,7 @@ export function AgentsPage() {
 
   const isLoading = agentsLoading || currentAgentLoading;
 
-  const agentUrl = (id: string) => id === currentAgent?.id ? '/agents/me' : `/agents/${id}`;
+  const agentUrl = (id: string) => `/admin/agents/${id}`;
 
   const [editTarget, setEditTarget] = useState<Agent | null>(null);
   const [editOpen, setEditOpen] = useState(false);

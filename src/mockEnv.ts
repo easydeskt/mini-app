@@ -1,10 +1,7 @@
 import { emitEvent, isTMA, mockTelegramEnv } from '@telegram-apps/sdk-react';
 
-import { installMockApi } from './mocks/api';
-
 if (import.meta.env.DEV) {
   if (!await isTMA('complete')) {
-    installMockApi();
     const themeParams = {
       accent_text_color: '#3e88f7',
       bg_color: '#212121',
