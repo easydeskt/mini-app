@@ -107,7 +107,6 @@ export function TicketListPage() {
   }
 
   const openCount = stats?.openTickets ?? 0;
-  const inProgressCount = stats?.inProgressTickets ?? 0;
 
   const [showScrollTop, setShowScrollTop] = useState(false);
   useEffect(() => {
@@ -138,20 +137,16 @@ export function TicketListPage() {
 
   return (
     <div className="touch-pan-y flex min-h-dvh flex-col bg-background" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md">
-        <div className="mx-auto max-w-120 px-4 pb-4 pt-4">
+      <div className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur-md">
+        <div className="mx-auto max-w-120 px-4 py-2">
         <div className="flex items-start justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">
               {t('tickets.page_title')}
+              {!isLoading && tickets.length > 0 && (
+                <span className="font-normal text-muted-foreground"> • {openCount} {t('tickets.stats_active')}</span>
+              )}
             </h1>
-            {isLoading ? (
-              <Skeleton className="mt-1 h-4 w-36" />
-            ) : tickets.length > 0 && (
-              <p className="mt-0.5 text-sm text-muted-foreground">
-                {openCount} {t('tickets.stats_active')} · {inProgressCount} {t('tickets.stats_in_progress')}
-              </p>
-            )}
           </div>
           <div className="mt-0.5">
             <button onClick={() => { void navigate('/agents/me'); }}>

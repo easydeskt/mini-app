@@ -16,3 +16,6 @@ export const fetchAgent = (id: string) =>
 
 export const fetchAgents = (activeOnly = true) =>
   apiClient.get<ApiAgentResponse[]>(`/api/v1/agents?activeOnly=${activeOnly}`);
+
+export const patchAgent = (id: string, patch: { display_name?: string; is_active?: boolean; role?: string }) =>
+  apiClient.patch<ApiAgentResponse>(`/api/v1/agents/${id}`, patch);

@@ -15,7 +15,11 @@ import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } 
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, LifeBuoy, MessageCircleMore, MoreVertical, Trash2 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
+import { queryKeys } from '@/api/query-keys';
+import { createTemplate, deleteTemplate, updateTemplate } from '@/api/templates';
 import { AttachmentPreviewOverlay, type PreviewableAttachment, type PreviewState } from '@/components/admin/AttachmentPreviewOverlay';
 import { MediaGrid } from '@/components/admin/MediaGrid';
 import { MessageBlockSheet } from '@/components/admin/MessageBlockSheet';
@@ -40,9 +44,9 @@ import {
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 import { Separator } from '@/components/ui/separator';
+import { useTemplate } from '@/hooks/queries/useTemplates';
 import { useBackButton } from '@/hooks/useBackButton';
 import { useT } from '@/hooks/useT';
-import { useTemplate } from '@/hooks/queries/useTemplates';
 import type { MessageBlock, PhotoAttachment, VideoAttachment } from '@/types/template';
 
 type OnPreviewFn = (attachment: PreviewableAttachment) => void;
@@ -135,6 +139,40 @@ export function TemplateEditPage() {
     useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
   );
 
+  const queryClient = useQueryClient();
+
+  function getContent(): string | null {
+    const text = blocks.map(b => b.text.trim()).filter(Boolean).join('\n\n');
+    return text || null;
+  }
+
+  const saveMutation = useMutation({
+    mutationFn: () => isNew
+      ? createTemplate(name.trim(), getContent())
+      : updateTemplate(+(id ?? 0), name.trim(), getContent()),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.templates.all });
+      if (!isNew) {
+        void queryClient.invalidateQueries({ queryKey: queryKeys.templates.detail(+(id ?? 0)) });
+      }
+      void navigate('/admin/templates');
+    },
+    onError: () => {
+      toast.error(t('templates.save_error') ?? 'Failed to save template');
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteTemplate(+(id ?? 0)),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.templates.all });
+      void navigate('/admin/templates');
+    },
+    onError: () => {
+      toast.error(t('templates.delete_error') ?? 'Failed to delete template');
+    },
+  });
+
   useBackButton();
 
   useEffect(() => {
@@ -193,7 +231,7 @@ export function TemplateEditPage() {
   }
 
   function handleSave() {
-    void navigate(-1);
+    saveMutation.mutate();
   }
 
   return (
@@ -203,7 +241,7 @@ export function TemplateEditPage() {
         <div className="fixed inset-0 z-40 bg-black/40 transition-opacity" />
       )}
 
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md">
+      <div className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur-md">
         <div className="mx-auto max-w-[480px] px-4 pb-3 pt-4">
           <div className="flex items-start justify-between gap-3">
             <h1 className="text-2xl font-bold tracking-tight">
@@ -318,7 +356,7 @@ export function TemplateEditPage() {
         <Button
           className="w-full"
           onClick={handleSave}
-          disabled={!name.trim()}
+          disabled={!name.trim() || saveMutation.isPending}
         >
           {t('templates.edit_save') ?? 'Save'}
         </Button>
@@ -363,7 +401,8 @@ export function TemplateEditPage() {
             <AlertDialogCancel>{t('templates.delete_cancel') ?? 'Cancel'}</AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
-              onClick={() => { setDeleteOpen(false); void navigate(-1); }}
+              disabled={deleteMutation.isPending}
+              onClick={() => { deleteMutation.mutate(); }}
             >
               {t('templates.delete_confirm') ?? 'Delete'}
             </AlertDialogAction>

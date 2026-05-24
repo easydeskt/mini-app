@@ -13,7 +13,6 @@ import { useBackButton } from '@/hooks/useBackButton';
 import { useChannelProvider } from '@/hooks/useChannelProviders';
 import { useChannels } from '@/hooks/queries/useChannels';
 import { useT } from '@/hooks/useT';
-import { pluralizeRu } from '@/utils/formatters';
 import type { Channel, ChannelProviderInfo } from '@/types/channel';
 
 type ChannelRowProps = {
@@ -90,16 +89,16 @@ export function ChannelsPage() {
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md">
-        <div className="mx-auto max-w-[480px] px-4 pb-3 pt-4">
+      <div className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur-md">
+        <div className="mx-auto max-w-120 px-4 pb-4 pt-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">{t('channels.page_title') ?? 'Channels'}</h1>
-            {isLoading ? (
-              <Skeleton className="mt-1 h-4 w-20" />
-            ) : channels.length > 0 ? (
-              <p className="text-sm text-muted-foreground">{pluralizeRu(channels.length, t('channels.count_one'), t('channels.count_few'), t('channels.count_many'))}</p>
-            ) : null}
+            <h1 className="text-3xl font-bold tracking-tight">
+              {t('channels.page_title') ?? 'Channels'}
+              {!isLoading && channels.length > 0 && (
+                <span className="font-normal text-muted-foreground"> • {channels.length}</span>
+              )}
+            </h1>
           </div>
           <Button
             variant="outline"
@@ -114,7 +113,7 @@ export function ChannelsPage() {
         </div>
       </div>
 
-      <div className="mx-auto flex w-full max-w-[480px] flex-1 flex-col px-4 pb-8">
+      <div className="mx-auto flex w-full max-w-120 flex-1 flex-col px-4 py-4">
         {isLoading ? (
           <div className="space-y-0 overflow-hidden rounded-xl border bg-card">
             {Array.from({ length: 3 }).map((_, i) => (
@@ -146,6 +145,7 @@ export function ChannelsPage() {
               <div>
                 <p className="mb-2 px-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   {t('channels.section_active') ?? 'Active'}
+                  <span className="font-normal"> • {activeChannels.length}</span>
                 </p>
                 <ChannelList channels={activeChannels} onChannelClick={handleChannelClick} />
               </div>
@@ -154,6 +154,7 @@ export function ChannelsPage() {
               <div className="opacity-60" data-testid="disabled-channels">
                 <p className="mb-2 px-1 text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   {t('channels.section_disabled') ?? 'Disabled'}
+                  <span className="font-normal"> • {disabledChannels.length}</span>
                 </p>
                 <ChannelList channels={disabledChannels} onChannelClick={handleChannelClick} />
               </div>

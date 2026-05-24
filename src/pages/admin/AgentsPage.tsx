@@ -15,16 +15,16 @@ import { useAgents } from '@/hooks/queries/useAgents';
 import { useBackButton } from '@/hooks/useBackButton';
 import { useCurrentAgent } from '@/hooks/queries/useCurrentAgent';
 import { useT } from '@/hooks/useT';
-import { pluralizeRu } from '@/utils/formatters';
 import type { Agent } from '@/types/agent';
 
-type AgentSectionProps = { title: string; children: React.ReactNode };
+type AgentSectionProps = { title: string; count: number; children: React.ReactNode };
 
-function AgentSection({ title, children }: AgentSectionProps) {
+function AgentSection({ title, count, children }: AgentSectionProps) {
   return (
     <div>
       <p className="mb-1.5 px-4 text-xs font-medium uppercase tracking-widest text-muted-foreground">
         {title}
+        <span className="font-normal"> • {count}</span>
       </p>
       <Card className="py-0">
         <CardContent className="p-0">{children}</CardContent>
@@ -33,9 +33,10 @@ function AgentSection({ title, children }: AgentSectionProps) {
   );
 }
 
-type AgentRowProps = { agent: Agent; onClick: () => void; onEdit: () => void };
+type AgentRowProps = { agent: Agent; isSelf?: boolean; onClick: () => void; onEdit: () => void };
 
-function AgentRow({ agent, onClick, onEdit }: AgentRowProps) {
+function AgentRow({ agent, isSelf, onClick, onEdit }: AgentRowProps) {
+  const t = useT();
   return (
     <div className="flex w-full items-stretch">
       <button
@@ -47,7 +48,14 @@ function AgentRow({ agent, onClick, onEdit }: AgentRowProps) {
           <AvatarFallback className="text-sm">{agent.initials}</AvatarFallback>
         </Avatar>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium">{agent.name}</p>
+          <div className="flex items-center gap-1.5">
+            <p className="text-sm font-medium">{agent.name}</p>
+            {isSelf && (
+              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium leading-none text-primary">
+                {t('agents.you_badge')}
+              </span>
+            )}
+          </div>
           {agent.username && <p className="text-xs text-muted-foreground">@{agent.username}</p>}
         </div>
       </button>
@@ -86,16 +94,16 @@ export function AgentsPage() {
   return (
     <div className="flex min-h-dvh flex-col bg-background">
 
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md">
-        <div className="mx-auto max-w-[480px] px-4 pb-3 pt-4">
+      <div className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur-md">
+        <div className="mx-auto max-w-120 px-4 pb-4 pt-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">{t('agents.page_title') ?? 'Agents'}</h1>
-            {isLoading ? (
-              <Skeleton className="mt-1 h-4 w-24" />
-            ) : agents.length > 0 ? (
-              <p className="text-sm text-muted-foreground">{pluralizeRu(agents.length, t('agents.count_one'), t('agents.count_few'), t('agents.count_many'))}</p>
-            ) : null}
+            <h1 className="text-3xl font-bold tracking-tight">
+              {t('agents.page_title') ?? 'Agents'}
+              {!isLoading && agents.length > 0 && (
+                <span className="font-normal text-muted-foreground"> • {agents.length}</span>
+              )}
+            </h1>
           </div>
           <Button
             variant="outline"
@@ -110,7 +118,7 @@ export function AgentsPage() {
         </div>
       </div>
 
-      <div className="mx-auto flex w-full max-w-[480px] flex-1 flex-col space-y-4 px-4 pb-8">
+      <div className="mx-auto flex w-full max-w-120 flex-1 flex-col space-y-4 px-4 py-4">
         {isLoading ? (
           <div className="space-y-0 overflow-hidden rounded-xl border bg-card">
             {Array.from({ length: 4 }).map((_, i) => (
@@ -128,12 +136,13 @@ export function AgentsPage() {
         ) : (
           <>
             {admins.length > 0 && (
-              <AgentSection title={(t('agents.section_admins') ?? 'Admins').toUpperCase()}>
+              <AgentSection title={(t('agents.section_admins') ?? 'Admins').toUpperCase()} count={admins.length}>
                 {admins.map((agent, i) => (
                   <React.Fragment key={agent.id}>
                     {i > 0 && <div className="mx-4 h-px bg-border" />}
                     <AgentRow
                       agent={agent}
+                      isSelf={agent.id === currentAgent?.id}
                       onClick={() => { void navigate(agentUrl(agent.id)); }}
                       onEdit={() => { setEditTarget(agent); setEditOpen(true); }}
                     />
@@ -142,7 +151,7 @@ export function AgentsPage() {
               </AgentSection>
             )}
 
-            <AgentSection title={(t('agents.section_operators') ?? 'Operators').toUpperCase()}>
+            <AgentSection title={(t('agents.section_operators') ?? 'Operators').toUpperCase()} count={operators.length}>
               {operators.length === 0 ? (
                 <div className="px-4 py-3 text-sm text-muted-foreground">{t('agents.no_operators') ?? 'No operators'}</div>
               ) : (
@@ -162,7 +171,7 @@ export function AgentsPage() {
         )}
       </div>
 
-      <AgentEditSheet agent={editTarget} open={editOpen} onOpenChange={setEditOpen} />
+      <AgentEditSheet agent={editTarget} open={editOpen} onOpenChange={setEditOpen} isSelf={editTarget?.id === currentAgent?.id} />
       <AgentAddSheet open={inviteOpen} onOpenChange={setInviteOpen} />
 
     </div>

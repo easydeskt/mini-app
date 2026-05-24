@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { Pencil, TagIcon, Trash2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import {
   ColorPicker,
@@ -28,6 +30,8 @@ import {
   InputGroupInput,
 } from '@/components/ui/input-group';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { queryKeys } from '@/api/query-keys';
+import { deleteTag, updateTag } from '@/api/tags';
 import { useT } from '@/hooks/useT';
 import type { Tag } from '@/types/tag';
 import { rgbaArrayToInt, rgbaIntToHex } from '@/utils/color';
@@ -52,6 +56,31 @@ export function TagEditSheet({ tag, open, onOpenChange }: TagEditSheetProps) {
       setColor(tag.color);
     }
   }, [tag]);
+
+  const queryClient = useQueryClient();
+
+  const updateMutation = useMutation({
+    mutationFn: () => updateTag(tag!.id, name.trim(), color),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.tags.all });
+      onOpenChange(false);
+    },
+    onError: () => {
+      toast.error(t('tags.update_error') ?? 'Failed to update tag');
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteTag(tag!.id),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.tags.all });
+      setDeleteOpen(false);
+      onOpenChange(false);
+    },
+    onError: () => {
+      toast.error(t('tags.delete_error') ?? 'Failed to delete tag');
+    },
+  });
 
   const handleColorChange = useCallback<ColorChangeHandler>((rgba) => {
     const arr = rgba as number[];
@@ -112,7 +141,11 @@ export function TagEditSheet({ tag, open, onOpenChange }: TagEditSheetProps) {
               </ColorPicker>
             </div>
 
-            <Button className="w-full" onClick={() => onOpenChange(false)}>
+            <Button
+              className="w-full"
+              onClick={() => updateMutation.mutate()}
+              disabled={name.trim() === '' || updateMutation.isPending || deleteMutation.isPending}
+            >
               {t('tags.edit_save') ?? 'Save'}
             </Button>
 
@@ -130,7 +163,8 @@ export function TagEditSheet({ tag, open, onOpenChange }: TagEditSheetProps) {
             <AlertDialogCancel>{t('tags.delete_cancel') ?? 'Cancel'}</AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
-              onClick={() => { setDeleteOpen(false); onOpenChange(false); }}
+              onClick={() => deleteMutation.mutate()}
+              disabled={deleteMutation.isPending}
             >
               {t('tags.delete_confirm') ?? 'Delete'}
             </AlertDialogAction>

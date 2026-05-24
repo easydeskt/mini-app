@@ -1,16 +1,20 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { MonitorSmartphone } from 'lucide-react';
 import { useNavigate, useParams, useSearchParams } from 'react-router';
+import { toast } from 'sonner';
 
+import { createChannel, updateChannel } from '@/api/channels';
+import { queryKeys } from '@/api/query-keys';
 import { ChannelConfigSection } from '@/components/admin/ChannelConfigSection';
 import { Button } from '@/components/ui/button';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { useBackButton } from '@/hooks/useBackButton';
-import { useChannelProvider } from '@/hooks/useChannelProviders';
 import { useChannel } from '@/hooks/queries/useChannels';
+import { useChannelProvider } from '@/hooks/useChannelProviders';
 import { useT } from '@/hooks/useT';
 import type { ChannelProviderInfo } from '@/types/channel';
 import { isRootSection } from '@/utils/channelSchema';
@@ -58,11 +62,39 @@ export function ChannelEditPage() {
   const resolvedBrand = isNew ? brandParam : (channel?.brand ?? '');
   const { data: provider, isLoading: providerLoading } = useChannelProvider(resolvedBrand);
 
-  const [displayName, setDisplayName] = useState(channel?.displayName ?? '');
-  const [isEnabled, setIsEnabled] = useState(channel?.isEnabled ?? true);
-  const [config, setConfig] = useState<Record<string, unknown>>(
-    () => channel?.config ?? (provider ? buildDefaultConfig(provider) : {}),
-  );
+  const [displayName, setDisplayName] = useState('');
+  const [isEnabled, setIsEnabled] = useState(true);
+  const [config, setConfig] = useState<Record<string, unknown>>({});
+
+  useEffect(() => {
+    if (channel && !isNew) {
+      setDisplayName(channel.displayName);
+      setIsEnabled(channel.isEnabled);
+      setConfig(channel.config);
+    }
+  }, [channel, isNew]);
+
+  useEffect(() => {
+    if (isNew && provider) {
+      setConfig(buildDefaultConfig(provider));
+    }
+  }, [isNew, provider]);
+
+  const queryClient = useQueryClient();
+
+  const saveMutation = useMutation({
+    mutationFn: () => isNew
+      ? createChannel(resolvedBrand, displayName.trim(), config)
+      : updateChannel(channelId!, displayName.trim(), isEnabled, config),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.channels.list(false) });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.channels.list(true) });
+      void navigate('/admin/channels');
+    },
+    onError: () => {
+      toast.error(t('channels.save_error') ?? 'Failed to save channel');
+    },
+  });
 
   useBackButton();
 
@@ -81,12 +113,12 @@ export function ChannelEditPage() {
   };
 
   const handleSave = () => {
-    void navigate('/admin/channels');
+    saveMutation.mutate();
   };
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md">
+      <div className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur-md">
         <div className="mx-auto max-w-[480px] px-4 pb-3 pt-4">
           <h1 className="text-2xl font-bold tracking-tight">
             {isNew ? (t('channels.edit_title_new') ?? 'New channel') : displayName || provider.name}
@@ -127,7 +159,7 @@ export function ChannelEditPage() {
           <Switch checked={isEnabled} onCheckedChange={setIsEnabled} className="mt-0.5 shrink-0" />
         </div>
         <Separator />
-        <Button className="w-full" disabled={!displayName.trim()} onClick={handleSave}>
+        <Button className="w-full" disabled={!displayName.trim() || saveMutation.isPending} onClick={handleSave}>
           {t('channels.edit_save') ?? 'Save'}
         </Button>
         </div>

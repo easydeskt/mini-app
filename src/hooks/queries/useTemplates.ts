@@ -29,6 +29,7 @@ export function useTemplate(id: number): { data: ReplyTemplate | undefined; isLo
     queryFn: () => fetchTemplate(id),
     enabled: id > 0,
     retry: false,
+    select: toTemplate,
   });
-  return { data: data ? toTemplate(data) : undefined, isLoading };
+  return { data, isLoading };
 }

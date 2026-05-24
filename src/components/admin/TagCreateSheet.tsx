@@ -1,6 +1,8 @@
 import { useCallback, useState } from 'react';
 
 import { Plus, TagIcon } from 'lucide-react';
+import { toast } from 'sonner';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import {
   ColorPicker,
@@ -18,6 +20,8 @@ import {
   InputGroupInput,
 } from '@/components/ui/input-group';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { queryKeys } from '@/api/query-keys';
+import { createTag } from '@/api/tags';
 import { useT } from '@/hooks/useT';
 import { rgbaArrayToInt, rgbaIntToHex } from '@/utils/color';
 
@@ -35,15 +39,27 @@ export function TagCreateSheet({ open, onOpenChange }: TagCreateSheetProps) {
   const [color, setColor] = useState<number>(DEFAULT_COLOR);
   const t = useT();
 
+  const queryClient = useQueryClient();
+  const createMutation = useMutation({
+    mutationFn: () => createTag(name.trim(), color),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.tags.all });
+      setName('');
+      setColor(DEFAULT_COLOR);
+      onOpenChange(false);
+    },
+    onError: () => {
+      toast.error(t('tags.create_error') ?? 'Failed to create tag');
+    },
+  });
+
   const handleColorChange = useCallback<ColorChangeHandler>((rgba) => {
     const arr = rgba as number[];
     setColor(rgbaArrayToInt(arr[0], arr[1], arr[2], arr[3]));
   }, []);
 
   function handleCreate() {
-    setName('');
-    setColor(DEFAULT_COLOR);
-    onOpenChange(false);
+    createMutation.mutate();
   }
 
   return (
@@ -86,7 +102,7 @@ export function TagCreateSheet({ open, onOpenChange }: TagCreateSheetProps) {
             </ColorPicker>
           </div>
 
-          <Button className="w-full" onClick={handleCreate} disabled={name.trim() === ''}>
+          <Button className="w-full" onClick={handleCreate} disabled={name.trim() === '' || createMutation.isPending}>
             {t('tags.create_submit') ?? 'Create'}
           </Button>
 

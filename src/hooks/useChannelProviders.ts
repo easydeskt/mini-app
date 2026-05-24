@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+
 import { useQuery } from '@tanstack/react-query';
 
 import { fetchChannelProviders, type ApiChannelProviderResponse } from '@/api/channels';
@@ -13,16 +15,25 @@ function toProviderInfo(p: ApiChannelProviderResponse): ChannelProviderInfo {
   };
 }
 
+function toProviderInfoList(data: ApiChannelProviderResponse[]): ChannelProviderInfo[] {
+  return data.map(toProviderInfo);
+}
+
 export function useChannelProviders(): { data: ChannelProviderInfo[]; isLoading: boolean } {
   const { data = [], isLoading } = useQuery({
     queryKey: queryKeys.channels.providers,
     queryFn: fetchChannelProviders,
     retry: false,
+    select: toProviderInfoList,
   });
-  return { data: data.map(toProviderInfo), isLoading };
+  return { data, isLoading };
 }
 
 export function useChannelProvider(brand: string): { data: ChannelProviderInfo | undefined; isLoading: boolean } {
   const { data: providers, isLoading } = useChannelProviders();
-  return { data: brand ? providers.find(p => p.brand === brand) : undefined, isLoading };
+  const provider = useMemo(
+    () => (brand ? providers.find(p => p.brand === brand) : undefined),
+    [brand, providers],
+  );
+  return { data: provider, isLoading };
 }

@@ -9,7 +9,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { FetchError } from '@/components/ui/list-error';
 import { Skeleton } from '@/components/ui/skeleton';
-import { pluralizeRu } from '@/utils/formatters';
 import { useBackButton } from '@/hooks/useBackButton';
 import { useTemplates } from '@/hooks/queries/useTemplates';
 import { useT } from '@/hooks/useT';
@@ -58,18 +57,16 @@ export function TemplatesPage() {
   return (
     <div className="flex min-h-dvh flex-col bg-background">
 
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md">
-        <div className="mx-auto max-w-[480px] px-4 pb-3 pt-4">
+      <div className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur-md">
+        <div className="mx-auto max-w-120 px-4 pb-4 pt-4">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">{t('templates.page_title') ?? 'Reply templates'}</h1>
-            {isLoading ? (
-              <Skeleton className="mt-1 h-4 w-24" />
-            ) : templates.length > 0 ? (
-              <p className="text-sm text-muted-foreground">
-                {pluralizeRu(templates.length, t('templates.count_one'), t('templates.count_few'), t('templates.count_many'))}
-              </p>
-            ) : null}
+            <h1 className="text-3xl font-bold tracking-tight">
+              {t('templates.page_title') ?? 'Reply templates'}
+              {!isLoading && templates.length > 0 && (
+                <span className="font-normal text-muted-foreground"> • {templates.length}</span>
+              )}
+            </h1>
           </div>
           <Button
             variant="outline"
@@ -84,7 +81,7 @@ export function TemplatesPage() {
         </div>
       </div>
 
-      <div className="mx-auto flex w-full max-w-[480px] flex-1 flex-col px-4 pb-4">
+      <div className="mx-auto flex w-full max-w-120 flex-1 flex-col px-4 py-4">
         {isLoading ? (
           <div className="space-y-0 overflow-hidden rounded-xl border bg-card">
             {Array.from({ length: 4 }).map((_, i) => (

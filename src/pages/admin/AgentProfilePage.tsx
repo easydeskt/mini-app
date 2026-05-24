@@ -29,7 +29,7 @@ export function AgentProfilePage() {
 
   return (
     <div className="flex min-h-dvh flex-col bg-background">
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-md">
+      <div className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur-md">
         <div className="mx-auto max-w-[480px] px-4 pb-3 pt-4">
           {noData ? (
             <Skeleton className="h-8 w-40" />
