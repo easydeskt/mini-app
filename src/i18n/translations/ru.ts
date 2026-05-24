@@ -267,6 +267,7 @@ export const ru = {
     help_bullet_attachments: 'Добавляйте до 10 вложений к сообщениям',
     help_bullet_preview: 'Кликайте по вложению для предпросмотра',
     help_bot_note: 'Вы также можете делать это через бота в чате:',
+    help_cmd_arg: 'название',
     help_ok: 'Понятно',
   },
   channels: {

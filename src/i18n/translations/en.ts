@@ -267,6 +267,7 @@ export const en = {
     help_bullet_attachments: 'Add up to 10 attachments to messages',
     help_bullet_preview: 'Click an attachment to preview it',
     help_bot_note: 'You can also do this via the bot in chat:',
+    help_cmd_arg: 'name',
     help_ok: 'Got it',
   },
   channels: {

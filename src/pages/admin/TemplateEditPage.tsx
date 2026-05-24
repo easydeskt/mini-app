@@ -381,7 +381,7 @@ export function TemplateEditPage() {
             <div className="rounded-lg bg-muted px-4 py-3">
               <p className="font-mono text-xs">
                 /template{' '}
-                <span className="text-muted-foreground">название</span>
+                <span className="text-muted-foreground">{t('templates.help_cmd_arg')}</span>
               </p>
             </div>
           </div>
