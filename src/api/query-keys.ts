@@ -19,4 +19,5 @@ export const queryKeys = {
     all: ['tickets'] as const,
     detail: (id: number) => ['tickets', id] as const,
   },
+  workspace: ['workspace'] as const,
 };

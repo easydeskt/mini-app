@@ -145,6 +145,7 @@ export const en = {
     page_title: 'Workspace management',
     section_management: 'Management',
     section_about: 'About system',
+    about_uptime: 'Uptime',
     stat_open: 'open tickets',
     stat_in_progress: 'tickets in progress',
     stat_avg_response: 'avg response time',
@@ -315,6 +316,12 @@ export const en = {
     preview_unsupported_description: 'File format not supported. Download and open it on your device.',
     preview_download: 'Download file',
     voice_label_short: 'Voice message',
+  },
+  time: {
+    days: 'd',
+    hours: 'h',
+    less_than_minute: '< 1 min',
+    minutes: 'min',
   },
   common: {
     section_in_dev: 'Section under development',

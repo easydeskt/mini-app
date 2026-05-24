@@ -20,7 +20,7 @@ import { PRIORITY_ICON_BG, SourceIcon, STATUS_DOT } from '@/utils/ticketDisplay'
 import { useAgents } from '@/hooks/queries/useAgents';
 import { useCurrentAgent } from '@/hooks/queries/useCurrentAgent';
 import { useT } from '@/hooks/useT';
-import { useWorkspaceStats } from '@/hooks/queries/useWorkspaceStats';
+import { useWorkspace } from '@/hooks/queries/useWorkspace';
 import type { Agent } from '@/types/agent';
 import type { Ticket, TicketFilter, TicketStatus } from '@/types/ticket';
 
@@ -45,7 +45,7 @@ export function TicketListPage() {
   const tgUser = useSignal(initData.user);
   const { data: agent, isLoading: agentLoading } = useCurrentAgent();
   const { data: agents } = useAgents();
-  const { data: stats } = useWorkspaceStats();
+  const { data: workspace } = useWorkspace();
   const { data: tickets, isError: ticketsError, isLoading: ticketsLoading, refetch: refetchTickets, error: ticketsFetchError } = useTickets();
   const t = useT();
 
@@ -106,7 +106,7 @@ export function TicketListPage() {
     setActiveFilter('all');
   }
 
-  const openCount = stats?.openTickets ?? 0;
+  const openCount = workspace?.metrics.tickets_counters.open ?? 0;
 
   const [showScrollTop, setShowScrollTop] = useState(false);
   useEffect(() => {
@@ -139,7 +139,7 @@ export function TicketListPage() {
     <div className="touch-pan-y flex min-h-dvh flex-col bg-background" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
       <div className="sticky top-0 z-10 border-b bg-background/80 backdrop-blur-md">
         <div className="mx-auto max-w-120 px-4 py-2">
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold tracking-tight">
               {t('tickets.page_title')}
@@ -148,7 +148,7 @@ export function TicketListPage() {
               )}
             </h1>
           </div>
-          <div className="mt-0.5">
+          <div>
             <button onClick={() => { void navigate('/agents/me'); }}>
               {avatarNoData ? (
                 <Skeleton className="h-9 w-9 rounded-full" />

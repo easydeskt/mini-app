@@ -54,3 +54,35 @@ export function formatSize(bytes: number): string {
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} КБ`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} МБ`;
 }
+
+export type DurationUnits = {
+  days: string;
+  hours: string;
+  lessThanMinute: string;
+  minutes: string;
+};
+
+export function formatUptime(startedAt: number, u: DurationUnits): string {
+  const elapsed = Date.now() - startedAt;
+  const days = Math.floor(elapsed / 86_400_000);
+  const hours = Math.floor((elapsed % 86_400_000) / 3_600_000);
+  const minutes = Math.floor((elapsed % 3_600_000) / 60_000);
+  if (days > 0) {
+    return hours > 0 ? `${days} ${u.days}, ${hours} ${u.hours}` : `${days} ${u.days}`;
+  }
+  if (hours > 0) {
+    return minutes > 0 ? `${hours} ${u.hours}, ${minutes} ${u.minutes}` : `${hours} ${u.hours}`;
+  }
+  return minutes === 0 ? u.lessThanMinute : `${minutes} ${u.minutes}`;
+}
+
+export function formatAvgResponseTime(minutes: number, u: Pick<DurationUnits, 'hours' | 'minutes'>): string {
+  if (minutes === 0) return '—';
+  const totalMinutes = Math.round(minutes);
+  const hours = Math.floor(totalMinutes / 60);
+  const mins = totalMinutes % 60;
+  if (hours > 0) {
+    return mins > 0 ? `${hours} ${u.hours}, ${mins} ${u.minutes}` : `${hours} ${u.hours}`;
+  }
+  return `${totalMinutes} ${u.minutes}`;
+}

@@ -145,6 +145,7 @@ export const ru = {
     page_title: 'Управление рабочей областью',
     section_management: 'Управление',
     section_about: 'О системе',
+    about_uptime: 'Аптайм',
     stat_open: 'тикетов открыто',
     stat_in_progress: 'тикетов в работе',
     stat_avg_response: 'среднее время ответа',
@@ -315,6 +316,12 @@ export const ru = {
     preview_unsupported_description: 'Формат файла не поддерживается. Загрузите и откройте его на устройстве.',
     preview_download: 'Загрузить файл',
     voice_label_short: 'Голосовое сообщение',
+  },
+  time: {
+    days: 'дн',
+    hours: 'ч',
+    less_than_minute: '< 1 мин',
+    minutes: 'мин',
   },
   common: {
     section_in_dev: 'Раздел в разработке',
