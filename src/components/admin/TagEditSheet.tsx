@@ -30,6 +30,7 @@ import {
   InputGroupInput,
 } from '@/components/ui/input-group';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { ApiError } from '@/api/client';
 import { queryKeys } from '@/api/query-keys';
 import { deleteTag, updateTag } from '@/api/tags';
 import { useT } from '@/hooks/useT';
@@ -65,8 +66,12 @@ export function TagEditSheet({ tag, open, onOpenChange }: TagEditSheetProps) {
       void queryClient.invalidateQueries({ queryKey: queryKeys.tags.all });
       onOpenChange(false);
     },
-    onError: () => {
-      toast.error(t('tags.update_error') ?? 'Failed to update tag');
+    onError: (error) => {
+      if (error instanceof ApiError && error.status === 409) {
+        toast.error(t('tags.name_conflict') ?? 'A tag with this name already exists');
+      } else {
+        toast.error(t('tags.update_error') ?? 'Failed to update tag');
+      }
     },
   });
 

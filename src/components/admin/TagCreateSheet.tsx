@@ -20,6 +20,7 @@ import {
   InputGroupInput,
 } from '@/components/ui/input-group';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { ApiError } from '@/api/client';
 import { queryKeys } from '@/api/query-keys';
 import { createTag } from '@/api/tags';
 import { useT } from '@/hooks/useT';
@@ -48,8 +49,12 @@ export function TagCreateSheet({ open, onOpenChange }: TagCreateSheetProps) {
       setColor(DEFAULT_COLOR);
       onOpenChange(false);
     },
-    onError: () => {
-      toast.error(t('tags.create_error') ?? 'Failed to create tag');
+    onError: (error) => {
+      if (error instanceof ApiError && error.status === 409) {
+        toast.error(t('tags.name_conflict') ?? 'A tag with this name already exists');
+      } else {
+        toast.error(t('tags.create_error') ?? 'Failed to create tag');
+      }
     },
   });
 

@@ -57,14 +57,47 @@ export type Attachment =
 
 export type AttachmentType = Attachment['type'];
 
-export type MessageBlock = {
-  id: string;
-  text: string;
-  attachments: Attachment[];
+export type ApiAttachmentKind = 'AUDIO' | 'DOCUMENT' | 'PHOTO' | 'VIDEO' | 'VOICE';
+
+export type TemplateAttachment = {
+  attachment_id: number;
+  attributes?: Record<string, unknown>;
+  content_type: string;
+  file_name: string;
+  file_size: number;
+  kind: ApiAttachmentKind;
+  template_id: number;
 };
 
 export type ReplyTemplate = {
+  attachments: TemplateAttachment[];
+  content: string | null;
   id: number;
   name: string;
-  blocks: MessageBlock[];
 };
+
+export type PendingUiAttachment = {
+  _uiKind: 'pending';
+  attributes: Record<string, unknown>;
+  contentType: string;
+  file: File;
+  fileName: string;
+  fileSize: number;
+  hash: string;
+  kind: ApiAttachmentKind;
+  localId: string;
+  objectUrl: string;
+};
+
+export type ServerUiAttachment = {
+  _uiKind: 'server';
+  attachmentId: number;
+  attributes?: Record<string, unknown>;
+  contentType: string;
+  fileName: string;
+  fileSize: number;
+  kind: ApiAttachmentKind;
+  templateId: number;
+};
+
+export type UiAttachment = PendingUiAttachment | ServerUiAttachment;

@@ -58,6 +58,7 @@ function SheetContent({
       <SheetPrimitive.Content
         data-slot="sheet-content"
         onOpenAutoFocus={side === 'bottom' ? (e => e.preventDefault()) : undefined}
+        onCloseAutoFocus={side === 'bottom' ? (e => e.preventDefault()) : undefined}
         className={cn(
           "fixed z-50 flex flex-col gap-4 bg-background transition ease-in-out data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:animate-in data-[state=open]:duration-500",
           side === "right" &&

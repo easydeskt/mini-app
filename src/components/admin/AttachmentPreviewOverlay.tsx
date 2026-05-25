@@ -232,7 +232,7 @@ function DocumentPreview({ attachment, onClose }: { attachment: DocumentAttachme
   }, [attachment.url, isMarkdown]);
 
   return (
-    <div className="fixed inset-0 z-60 flex flex-col bg-background" onPointerDown={e => e.stopPropagation()} onClick={e => e.stopPropagation()}>
+    <div className="fixed inset-0 z-[60] flex flex-col bg-background" onPointerDown={e => e.stopPropagation()} onClick={e => e.stopPropagation()}>
       <div className="z-10 flex shrink-0 items-center gap-2 border-b bg-background/80 px-4 py-3 backdrop-blur-md">
         <Button variant="outline" size="icon" className="shrink-0 rounded-full" onClick={onClose}>
           <ArrowLeft className="h-4 w-4" />

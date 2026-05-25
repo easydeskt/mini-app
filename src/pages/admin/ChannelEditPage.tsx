@@ -5,6 +5,7 @@ import { MonitorSmartphone } from 'lucide-react';
 import { useNavigate, useParams, useSearchParams } from 'react-router';
 import { toast } from 'sonner';
 
+import { ApiError } from '@/api/client';
 import { createChannel, updateChannel } from '@/api/channels';
 import { queryKeys } from '@/api/query-keys';
 import { ChannelConfigSection } from '@/components/admin/ChannelConfigSection';
@@ -91,8 +92,12 @@ export function ChannelEditPage() {
       void queryClient.invalidateQueries({ queryKey: queryKeys.channels.list(true) });
       void navigate('/admin/channels');
     },
-    onError: () => {
-      toast.error(t('channels.save_error') ?? 'Failed to save channel');
+    onError: (error) => {
+      if (error instanceof ApiError && error.status === 409) {
+        toast.error(t('channels.name_conflict') ?? 'A channel with this name already exists');
+      } else {
+        toast.error(t('channels.save_error') ?? 'Failed to save channel');
+      }
     },
   });
 

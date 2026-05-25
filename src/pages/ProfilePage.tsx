@@ -1,7 +1,7 @@
 import { type ReactNode } from 'react';
 
 import { initData, useSignal } from '@telegram-apps/sdk-react';
-import { ChevronRight, Star } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router';
 
 import { InfoRow } from '@/components/shared/InfoRow';
@@ -14,6 +14,20 @@ import { useCurrentAgent } from '@/hooks/queries/useCurrentAgent';
 import { useT } from '@/hooks/useT';
 import type { AgentRole } from '@/types/agent';
 
+function formatAvgResponse(minutes: number | null, lang: string): string {
+  if (minutes === null) return '—';
+  const h = Math.floor(minutes / 60);
+  const m = Math.round(minutes % 60);
+  if (lang === 'ru') {
+    if (h === 0) return `${m}мин`;
+    if (m === 0) return `${h}ч`;
+    return `${h}ч ${m}м`;
+  }
+  if (h === 0) return `${m}m`;
+  if (m === 0) return `${h}h`;
+  return `${h}h ${m}m`;
+}
+
 export function ProfilePage() {
   const navigate = useNavigate();
   const tgUser = useSignal(initData.user);
@@ -22,6 +36,7 @@ export function ProfilePage() {
   useBackButton();
 
   const t = useT();
+  const lang = tgUser?.language_code === 'ru' ? 'ru' : 'en';
 
   const ROLE_LABEL: Record<AgentRole, string> = {
     ADMIN: t('profile.role_admin') ?? 'Administrator',
@@ -69,12 +84,11 @@ export function ProfilePage() {
         </Card>
 
         <div className="grid grid-cols-3 gap-2">
-          <StatCard value="12" label={t('profile.stats_resolved_today') ?? ''} loading={noData} skeletonWidth="w-8" />
-          <StatCard value="2 ч" label={t('profile.stats_avg_response') ?? ''} loading={noData} skeletonWidth="w-12" />
+          <StatCard value={String(agent?.resolvedToday ?? 0)} label={t('profile.stats_resolved_today') ?? ''} loading={noData} skeletonWidth="w-8" />
+          <StatCard value={formatAvgResponse(agent?.avgResponseMinutes ?? null, lang)} label={t('profile.stats_avg_response') ?? ''} loading={noData} skeletonWidth="w-12" />
           <StatCard
-            value="4.9"
+            value="—"
             label={t('profile.stats_rating') ?? ''}
-            icon={<Star className="h-4 w-4 fill-current" />}
             loading={noData}
             skeletonWidth="w-10"
           />

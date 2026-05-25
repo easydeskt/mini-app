@@ -1,12 +1,10 @@
 import { Fragment, useEffect, useState } from 'react';
 
-import { ArrowLeft } from 'lucide-react';
-
 import { AttachmentCardContent } from '@/components/admin/AttachmentCard';
 import { AttachmentPreviewOverlay, type PreviewState } from '@/components/admin/AttachmentPreviewOverlay';
+import { Button } from '@/components/ui/button';
 import { useAudioPlayer } from '@/hooks/useAudioPlayer';
 import { useT } from '@/hooks/useT';
-import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { AUDIO_EXTENSIONS, detectType, fileExt, getCompatibleTypes } from '@/utils/attachmentType';
 import { formatSize } from '@/utils/formatters';
@@ -19,7 +17,7 @@ type TypeOption = {
   description: string;
 };
 
-type ExtractedMeta = {
+export type ExtractedMeta = {
   width?: number;
   height?: number;
   duration?: number;
@@ -45,7 +43,7 @@ function fileToPreviewAttachment(file: File, url: string): DocumentAttachment {
 type AttachmentPickerDialogProps = {
   file: File;
   url: string;
-  onConfirm: (type: AttachmentType) => void;
+  onConfirm: (type: AttachmentType, meta: ExtractedMeta | null) => void;
   onPickAnother: () => void;
   onClose: () => void;
 };
@@ -116,6 +114,12 @@ export function AttachmentPickerDialog({ file, url, onConfirm, onPickAnother, on
     pause();
   }, [selectedType]);
 
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [onClose]);
+
   function handleCardClick() {
     if (isAudio) {
       toggle();
@@ -134,67 +138,69 @@ export function AttachmentPickerDialog({ file, url, onConfirm, onPickAnother, on
 
   return (
     <div
-      className="fixed inset-0 z-60 flex flex-col bg-background"
+      className="fixed inset-0 z-[60] flex flex-col bg-background"
       onPointerDown={e => e.stopPropagation()}
       onClick={e => e.stopPropagation()}
     >
-      <div className="z-10 flex shrink-0 items-center gap-2 border-b bg-background/80 px-4 py-3 backdrop-blur-md">
-        <Button variant="outline" size="icon" className="shrink-0 rounded-full" onClick={onClose}>
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
-        <h1 className="flex-1 truncate text-center text-base font-semibold">{t('attachments.picker_title') ?? 'Add attachment'}</h1>
-        <div className="w-9 shrink-0" />
+      <div className="z-10 shrink-0 border-b bg-background/80 backdrop-blur-md">
+        <div className="mx-auto max-w-[480px] px-4 py-3">
+          <h1 className="text-center text-base font-semibold">{t('attachments.picker_title') ?? 'Add attachment'}</h1>
+        </div>
       </div>
 
-      <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">
-        <div className="overflow-hidden rounded-lg border bg-card">
-          {isAudio && <audio ref={audioRef} src={url} onEnded={onEnded} />}
-          <div className="flex min-w-0 cursor-pointer items-center pl-3" onClick={handleCardClick}>
-            <AttachmentCardContent
-              attachment={displayAttachment}
-              playing={playing}
-              meta={metaOverride}
-              onMediaError={() => setMediaError(true)}
-            />
+      <div className="flex flex-1 flex-col overflow-y-auto">
+        <div className="mx-auto flex w-full max-w-[480px] flex-col gap-4 p-4">
+          <div className="overflow-hidden rounded-lg border bg-card">
+            {isAudio && <audio ref={audioRef} src={url} onEnded={onEnded} />}
+            <div className="flex min-w-0 cursor-pointer items-center pl-3" onClick={handleCardClick}>
+              <AttachmentCardContent
+                attachment={displayAttachment}
+                playing={playing}
+                meta={metaOverride}
+                onMediaError={() => setMediaError(true)}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <p className="text-sm font-medium">{t('attachments.picker_type_label') ?? 'Attachment type'}</p>
+            <RadioGroup
+              value={selectedType}
+              onValueChange={v => setSelectedType(v as AttachmentType)}
+              className="gap-0 overflow-hidden rounded-lg border"
+            >
+              {TYPE_OPTIONS.map((opt, i) => {
+                const disabled = !compatible.includes(opt.value);
+                return (
+                  <Fragment key={opt.value}>
+                    {i > 0 && <div className="h-px bg-border" />}
+                    <label
+                      htmlFor={`type-${opt.value}`}
+                      className={`flex items-center gap-3 px-4 py-3 transition-colors${disabled ? ' cursor-not-allowed opacity-40' : ' cursor-pointer hover:bg-muted/50 active:bg-muted'}`}
+                    >
+                      <RadioGroupItem value={opt.value} id={`type-${opt.value}`} disabled={disabled} />
+                      <div>
+                        <p className="text-sm">{opt.label}</p>
+                        <p className="text-xs text-muted-foreground">{opt.description}</p>
+                      </div>
+                    </label>
+                  </Fragment>
+                );
+              })}
+            </RadioGroup>
           </div>
         </div>
-
-        <div className="flex flex-col gap-2">
-          <p className="text-sm font-medium">{t('attachments.picker_type_label') ?? 'Attachment type'}</p>
-          <RadioGroup
-            value={selectedType}
-            onValueChange={v => setSelectedType(v as AttachmentType)}
-            className="gap-0 overflow-hidden rounded-lg border"
-          >
-            {TYPE_OPTIONS.map((opt, i) => {
-              const disabled = !compatible.includes(opt.value);
-              return (
-                <Fragment key={opt.value}>
-                  {i > 0 && <div className="h-px bg-border" />}
-                  <label
-                    htmlFor={`type-${opt.value}`}
-                    className={`flex items-center gap-3 px-4 py-3 transition-colors${disabled ? ' cursor-not-allowed opacity-40' : ' cursor-pointer hover:bg-muted/50 active:bg-muted'}`}
-                  >
-                    <RadioGroupItem value={opt.value} id={`type-${opt.value}`} disabled={disabled} />
-                    <div>
-                      <p className="text-sm">{opt.label}</p>
-                      <p className="text-xs text-muted-foreground">{opt.description}</p>
-                    </div>
-                  </label>
-                </Fragment>
-              );
-            })}
-          </RadioGroup>
-        </div>
       </div>
 
-      <div className="flex shrink-0 flex-col gap-2 border-t bg-background p-4">
-        <Button className="w-full" onClick={() => onConfirm(selectedType)}>
-          {t('attachments.picker_add') ?? 'Add'}
-        </Button>
-        <Button variant="outline" className="w-full" onClick={onPickAnother}>
-          {t('attachments.picker_change_file') ?? 'Choose a different file'}
-        </Button>
+      <div className="shrink-0 border-t bg-background">
+        <div className="mx-auto flex max-w-[480px] flex-col gap-2 p-4">
+          <Button className="w-full" onClick={() => onConfirm(selectedType, extractedMeta)}>
+            {t('attachments.picker_add') ?? 'Add'}
+          </Button>
+          <Button variant="outline" className="w-full" onClick={onPickAnother}>
+            {t('attachments.picker_change_file') ?? 'Choose a different file'}
+          </Button>
+        </div>
       </div>
 
       <AttachmentPreviewOverlay preview={preview} onClose={() => setPreview(null)} />

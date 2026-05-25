@@ -20,8 +20,8 @@ type TemplateRowProps = {
 };
 
 function TemplateRow({ template, onClick }: TemplateRowProps) {
-  const previewText = template.blocks.find(b => b.text.trim() !== '')?.text ?? null;
-  const attachmentCount = template.blocks.reduce((sum, b) => sum + b.attachments.length, 0);
+  const previewText = template.content?.trim() || null;
+  const attachmentCount = template.attachments.length;
 
   return (
     <button

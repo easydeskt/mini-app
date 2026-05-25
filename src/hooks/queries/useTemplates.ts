@@ -6,9 +6,8 @@ import type { ReplyTemplate } from '@/types/template';
 
 function toTemplate(t: ApiTemplateResponse): ReplyTemplate {
   return {
-    blocks: t.content
-      ? [{ attachments: [], id: String(t.id), text: t.content }]
-      : [],
+    attachments: t.attachments,
+    content: t.content,
     id: t.id,
     name: t.human_name,
   };
@@ -19,8 +18,11 @@ export function useTemplates(): { data: ReplyTemplate[]; isError: boolean; isLoa
     queryKey: queryKeys.templates.all,
     queryFn: fetchTemplates,
     retry: false,
+    select: (raw) => raw
+      .map(toTemplate)
+      .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })),
   });
-  return { data: data.map(toTemplate), isError, isLoading, refetch: () => { void refetch(); }, error };
+  return { data, isError, isLoading, refetch: () => { void refetch(); }, error };
 }
 
 export function useTemplate(id: number): { data: ReplyTemplate | undefined; isLoading: boolean } {
@@ -30,6 +32,7 @@ export function useTemplate(id: number): { data: ReplyTemplate | undefined; isLo
     enabled: id > 0,
     retry: false,
     select: toTemplate,
+    staleTime: 30_000,
   });
   return { data, isLoading };
 }
