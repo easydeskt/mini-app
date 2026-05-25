@@ -17,4 +17,4 @@ export type WorkspaceResponse = {
   };
 };
 
-export const fetchWorkspace = () => apiClient.get<WorkspaceResponse>('/api/v1/workspace');
+export const fetchWorkspace = () => apiClient.get<WorkspaceResponse>('/workspace');

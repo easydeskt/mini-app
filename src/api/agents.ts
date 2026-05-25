@@ -12,10 +12,10 @@ export type ApiAgentResponse = {
 };
 
 export const fetchAgent = (id: string) =>
-  apiClient.get<ApiAgentResponse>(`/api/v1/agents/${id}`);
+  apiClient.get<ApiAgentResponse>(`/agents/${id}`);
 
 export const fetchAgents = (activeOnly = true) =>
-  apiClient.get<ApiAgentResponse[]>(`/api/v1/agents?activeOnly=${activeOnly}`);
+  apiClient.get<ApiAgentResponse[]>(`/agents?activeOnly=${activeOnly}`);
 
 export const patchAgent = (id: string, patch: { display_name?: string; is_active?: boolean; role?: string }) =>
-  apiClient.patch<ApiAgentResponse>(`/api/v1/agents/${id}`, patch);
+  apiClient.patch<ApiAgentResponse>(`/agents/${id}`, patch);

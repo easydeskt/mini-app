@@ -49,35 +49,35 @@ export const fetchTickets = (filters?: TicketFilters) => {
   if (filters?.status) params.set('status', filters.status);
   if (filters?.tagId !== undefined) params.set('tagId', String(filters.tagId));
   const query = params.toString();
-  return apiClient.get<ApiTicketResponse[]>(`/api/v1/tickets${query ? `?${query}` : ''}`);
+  return apiClient.get<ApiTicketResponse[]>(`/tickets${query ? `?${query}` : ''}`);
 };
 
 export const fetchTicket = (id: number) =>
-  apiClient.get<ApiTicketResponse>(`/api/v1/tickets/${id}`);
+  apiClient.get<ApiTicketResponse>(`/tickets/${id}`);
 
 export const assignTicket = (id: number, agentId: string) =>
-  apiClient.post<void>(`/api/v1/tickets/${id}/assign`, { agent_id: agentId });
+  apiClient.post<void>(`/tickets/${id}/assign`, { agent_id: agentId });
 
 export const freeTicket = (id: number) =>
-  apiClient.post<void>(`/api/v1/tickets/${id}/free`);
+  apiClient.post<void>(`/tickets/${id}/free`);
 
 export const resolveTicket = (id: number) =>
-  apiClient.post<void>(`/api/v1/tickets/${id}/resolve`);
+  apiClient.post<void>(`/tickets/${id}/resolve`);
 
 export const closeTicket = (id: number) =>
-  apiClient.post<void>(`/api/v1/tickets/${id}/close`);
+  apiClient.post<void>(`/tickets/${id}/close`);
 
 export const reopenTicket = (id: number) =>
-  apiClient.post<void>(`/api/v1/tickets/${id}/reopen`);
+  apiClient.post<void>(`/tickets/${id}/reopen`);
 
 export const setTicketPriority = (id: number, priority: string | null) =>
-  apiClient.post<void>(`/api/v1/tickets/${id}/priority`, { priority });
+  apiClient.post<void>(`/tickets/${id}/priority`, { priority });
 
 export const setTicketTags = (id: number, tagIds: number[]) =>
-  apiClient.post<void>(`/api/v1/tickets/${id}/tags`, { tag_ids: tagIds });
+  apiClient.post<void>(`/tickets/${id}/tags`, { tag_ids: tagIds });
 
 export const mergeTickets = (id: number, targetId: number) =>
-  apiClient.post<void>(`/api/v1/tickets/${id}/merge`, { target_ticket_id: targetId });
+  apiClient.post<void>(`/tickets/${id}/merge`, { target_ticket_id: targetId });
 
 export const setTicketAttributes = (id: number, attributes: Record<string, unknown>) =>
-  apiClient.patch<void>(`/api/v1/tickets/${id}/attributes`, attributes);
+  apiClient.patch<void>(`/tickets/${id}/attributes`, attributes);

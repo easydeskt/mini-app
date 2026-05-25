@@ -17,13 +17,13 @@ export type ApiChannelProviderResponse = {
 };
 
 export const fetchChannelProviders = () =>
-  apiClient.get<ApiChannelProviderResponse[]>('/api/v1/channels/providers');
+  apiClient.get<ApiChannelProviderResponse[]>('/channels/providers');
 
 export const fetchChannels = (enabledOnly = false) =>
-  apiClient.get<ApiChannelResponse[]>(`/api/v1/channels?enabledOnly=${enabledOnly}`);
+  apiClient.get<ApiChannelResponse[]>(`/channels?enabledOnly=${enabledOnly}`);
 
 export const createChannel = (brand: string, displayName: string, config: Record<string, unknown>) =>
-  apiClient.post<ApiChannelResponse>('/api/v1/channels', { brand, display_name: displayName, config });
+  apiClient.post<ApiChannelResponse>('/channels', { brand, display_name: displayName, config });
 
 export const updateChannel = (id: number, displayName: string, isEnabled: boolean, config: Record<string, unknown>) =>
-  apiClient.put<ApiChannelResponse>(`/api/v1/channels/${id}`, { display_name: displayName, is_enabled: isEnabled, config });
+  apiClient.put<ApiChannelResponse>(`/channels/${id}`, { display_name: displayName, is_enabled: isEnabled, config });

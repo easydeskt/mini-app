@@ -1,4 +1,12 @@
 export const ru = {
+  server_picker: {
+    subtitle: 'Выберите API-сервер для подключения',
+    option_production: 'Продакшн',
+    option_development: 'Разработка',
+    option_custom: 'Свой сервер',
+    custom_placeholder: 'http://my-server.example.com/api/v2',
+    connect: 'Подключиться',
+  },
   ui: {
     preferences: 'Предпочтения',
     language: 'Язык',

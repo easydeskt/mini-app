@@ -1,6 +1,22 @@
 import { initData } from '@telegram-apps/sdk-react';
 
-export const BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? 'http://localhost:8080';
+export const DEV_SERVER_KEY = 'easydesk_dev_server';
+
+export function getBaseUrl(): string {
+  if (import.meta.env.DEV) {
+    const stored = localStorage.getItem(DEV_SERVER_KEY);
+    if (stored) return stored;
+  }
+  return (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? 'http://localhost:8080/api/v1';
+}
+
+export function setDevServer(origin: string | null): void {
+  if (origin === null) {
+    localStorage.removeItem(DEV_SERVER_KEY);
+  } else {
+    localStorage.setItem(DEV_SERVER_KEY, origin);
+  }
+}
 
 export class ApiError extends Error {
   constructor(public readonly status: number, message: string) {
@@ -20,7 +36,7 @@ export function getAuthHeader(): string | null {
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const auth = getAuthHeader();
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const res = await fetch(`${getBaseUrl()}${path}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
@@ -40,7 +56,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
 async function requestForm<T>(path: string, body: FormData, method = 'POST'): Promise<T> {
   const auth = getAuthHeader();
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const res = await fetch(`${getBaseUrl()}${path}`, {
     method,
     body,
     headers: {

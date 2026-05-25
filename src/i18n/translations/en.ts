@@ -1,4 +1,12 @@
 export const en = {
+  server_picker: {
+    subtitle: 'Select API server to connect',
+    option_production: 'Production',
+    option_development: 'Development',
+    option_custom: 'Custom',
+    custom_placeholder: 'http://my-server.example.com/api/v2',
+    connect: 'Connect',
+  },
   ui: {
     preferences: 'Preferences',
     language: 'Language',

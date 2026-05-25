@@ -1,10 +1,14 @@
+import { useState } from 'react';
+
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { initData } from '@telegram-apps/sdk-react';
 
+import { DEV_SERVER_KEY } from '@/api/client';
 import { Button } from '@/components/ui/button';
 import { createT } from '@/i18n';
 
 import { App } from 'src/components/App.tsx';
+import { DevServerPicker } from 'src/components/DevServerPicker.tsx';
 import { ErrorBoundary } from 'src/components/ErrorBoundary.tsx';
 import { ErrorScreen } from 'src/components/ErrorScreen.tsx';
 
@@ -34,6 +38,14 @@ function ErrorBoundaryError({ error }: { error: unknown }) {
 }
 
 export function Root() {
+  const [serverReady, setServerReady] = useState(
+    !import.meta.env.DEV || !!localStorage.getItem(DEV_SERVER_KEY),
+  );
+
+  if (!serverReady) {
+    return <DevServerPicker onConnect={() => setServerReady(true)} />;
+  }
+
   return (
     <ErrorBoundary fallback={ErrorBoundaryError}>
       <QueryClientProvider client={queryClient}>

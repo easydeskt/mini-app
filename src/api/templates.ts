@@ -1,6 +1,6 @@
 import type { ApiAttachmentKind } from '@/types/template';
 
-import { apiClient, BASE_URL, getAuthHeader } from './client';
+import { apiClient, getAuthHeader, getBaseUrl } from './client';
 
 export type ApiTemplateAttachment = {
   attachment_id: number;
@@ -20,37 +20,37 @@ export type ApiTemplateResponse = {
 };
 
 export const createTemplate = (humanName: string, content: string | null) =>
-  apiClient.post<ApiTemplateResponse>('/api/v1/templates', { human_name: humanName, content });
+  apiClient.post<ApiTemplateResponse>('/templates', { human_name: humanName, content });
 
 export const deleteTemplate = (id: number) =>
-  apiClient.delete(`/api/v1/templates/${id}`);
+  apiClient.delete(`/templates/${id}`);
 
 export const fetchTemplate = (id: number) =>
-  apiClient.get<ApiTemplateResponse>(`/api/v1/templates/${id}`);
+  apiClient.get<ApiTemplateResponse>(`/templates/${id}`);
 
 export const fetchTemplates = () =>
-  apiClient.get<ApiTemplateResponse[]>('/api/v1/templates');
+  apiClient.get<ApiTemplateResponse[]>('/templates');
 
 export const updateTemplate = (id: number, humanName: string, content: string | null) =>
-  apiClient.put<ApiTemplateResponse>(`/api/v1/templates/${id}`, { human_name: humanName, content });
+  apiClient.put<ApiTemplateResponse>(`/templates/${id}`, { human_name: humanName, content });
 
 export const uploadTemplateAttachment = (templateId: number, kind: ApiAttachmentKind, file: File): Promise<ApiTemplateAttachment> => {
   const form = new FormData();
   form.append('kind', kind);
   form.append('file', file);
-  return apiClient.postForm<ApiTemplateAttachment>(`/api/v1/templates/${templateId}/attachments`, form);
+  return apiClient.postForm<ApiTemplateAttachment>(`/templates/${templateId}/attachments`, form);
 };
 
 export const reorderTemplateAttachments = (templateId: number, attachmentIds: number[]): Promise<void> =>
-  apiClient.put<void>(`/api/v1/templates/${templateId}/attachments/order`, { attachment_ids: attachmentIds });
+  apiClient.put<void>(`/templates/${templateId}/attachments/order`, { attachment_ids: attachmentIds });
 
 export const deleteTemplateAttachment = (templateId: number, attachmentId: number): Promise<void> =>
-  apiClient.delete(`/api/v1/templates/${templateId}/attachments/${attachmentId}`);
+  apiClient.delete(`/templates/${templateId}/attachments/${attachmentId}`);
 
 export const getTemplateAttachmentContentUrl = (templateId: number, attachmentId: number): string => {
   const auth = getAuthHeader();
   const raw = auth?.startsWith('tma ') ? auth.slice(4) : null;
-  const base = `${BASE_URL}/api/v1/templates/${templateId}/attachments/${attachmentId}/content`;
+  const base = `${getBaseUrl()}/templates/${templateId}/attachments/${attachmentId}/content`;
   return raw ? `${base}?tma_auth=${encodeURIComponent(raw)}` : base;
 };
 

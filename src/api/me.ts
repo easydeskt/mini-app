@@ -9,4 +9,4 @@ export type MeResponse = {
   resolved_today: number;
 };
 
-export const fetchMe = () => apiClient.get<MeResponse>('/api/v1/me');
+export const fetchMe = () => apiClient.get<MeResponse>('/me');
