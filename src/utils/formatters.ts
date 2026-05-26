@@ -14,23 +14,29 @@ export function pluralizeRu(count: number, one: string, few: string, many: strin
   return `${count} ${many}`;
 }
 
-export function formatRelativeTime(iso: string): string {
+const RELATIVE_UNITS = {
+  ru: { justNow: 'только что', min: 'мин', h: 'ч', d: 'дн', mo: 'мес', y: 'г' },
+  en: { justNow: 'just now',   min: 'min', h: 'h', d: 'd',  mo: 'mo',  y: 'y' },
+} as const;
+
+export function formatRelativeTime(iso: string, lang: 'ru' | 'en' = 'ru'): string {
   const diffMs = Date.now() - new Date(iso).getTime();
   const diffMin = Math.floor(diffMs / 60_000);
   const diffH = Math.floor(diffMs / 3_600_000);
   const diffDays = Math.floor(diffMs / 86_400_000);
+  const u = RELATIVE_UNITS[lang];
 
-  if (diffMin < 1) return 'только что';
-  if (diffMin < 60) return `${diffMin} мин`;
-  if (diffH < 24) return `${diffH} ч`;
-  if (diffDays < 30) return `${diffDays} дн`;
+  if (diffMin < 1) return u.justNow;
+  if (diffMin < 60) return `${diffMin} ${u.min}`;
+  if (diffH < 24) return `${diffH} ${u.h}`;
+  if (diffDays < 30) return `${diffDays} ${u.d}`;
   const diffMonths = Math.floor(diffDays / 30);
-  if (diffMonths < 12) return `${diffMonths} мес`;
-  return `${Math.floor(diffDays / 365)} г`;
+  if (diffMonths < 12) return `${diffMonths} ${u.mo}`;
+  return `${Math.floor(diffDays / 365)} ${u.y}`;
 }
 
-export function formatExactTime(iso: string): string {
-  return new Date(iso).toLocaleString('ru-RU', {
+export function formatExactTime(iso: string, lang: 'ru' | 'en' = 'ru'): string {
+  return new Date(iso).toLocaleString(lang === 'ru' ? 'ru-RU' : 'en-GB', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -39,9 +45,11 @@ export function formatExactTime(iso: string): string {
   });
 }
 
-export function formatAttachmentCount(count: number): string {
+export function formatAttachmentCount(count: number, lang: 'ru' | 'en' = 'ru'): string {
+  if (lang === 'en') return count === 1 ? '1 attachment' : `${count} attachments`;
   return pluralizeRu(count, 'вложение', 'вложения', 'вложений');
 }
+
 
 export function formatDuration(seconds: number): string {
   const m = Math.floor(seconds / 60);

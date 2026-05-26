@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@/components/ui/empty';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { useLang } from '@/hooks/useLang';
 import { useT } from '@/hooks/useT';
 import { useTickets } from '@/hooks/queries/useTickets';
 import { formatRelativeTime } from '@/utils/formatters';
@@ -31,6 +32,7 @@ type MergeTicketSheetProps = {
 
 export function MergeTicketSheet({ isPending, open, ticket, onMerge, onOpenChange }: MergeTicketSheetProps) {
   const t = useT();
+  const lang = useLang();
   const { data: allTickets, isLoading } = useTickets();
   const [confirmTarget, setConfirmTarget] = useState<Ticket | null>(null);
 
@@ -96,7 +98,7 @@ export function MergeTicketSheet({ isPending, open, ticket, onMerge, onOpenChang
                           {STATUS_LABEL[candidate.status] ?? candidate.status}
                         </span>
                         <span className="ml-auto text-xs text-muted-foreground">
-                          {formatRelativeTime(candidate.lastMessageAt)}
+                          {formatRelativeTime(candidate.lastMessageAt, lang)}
                         </span>
                       </div>
                       {candidate.messagePreview && (

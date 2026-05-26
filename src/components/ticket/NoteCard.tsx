@@ -20,6 +20,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useLang } from '@/hooks/useLang';
 import { useT } from '@/hooks/useT';
 import { formatRelativeTime } from '@/utils/formatters';
 import { getInitials } from '@/utils/initials';
@@ -34,6 +35,7 @@ type NoteCardProps = {
 
 export function NoteCard({ note, ticketId, onEdit, onDelete }: NoteCardProps) {
   const t = useT();
+  const lang = useLang();
   const [deleteOpen, setDeleteOpen] = useState(false);
   const initials = getInitials(note.authorName);
   const canEdit = Boolean(onEdit || onDelete);
@@ -91,7 +93,7 @@ export function NoteCard({ note, ticketId, onEdit, onDelete }: NoteCardProps) {
             </AvatarFallback>
           </Avatar>
           <span className="text-xs text-muted-foreground">
-            {note.authorName} · {formatRelativeTime(note.createdAt)}
+            {note.authorName} · {formatRelativeTime(note.createdAt, lang)}
           </span>
         </div>
       </div>

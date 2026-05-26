@@ -19,6 +19,7 @@ import { getInitials } from '@/utils/initials';
 import { PRIORITY_ICON_BG, SourceIcon, STATUS_DOT } from '@/utils/ticketDisplay';
 import { useAgents } from '@/hooks/queries/useAgents';
 import { useCurrentAgent } from '@/hooks/queries/useCurrentAgent';
+import { useLang } from '@/hooks/useLang';
 import { useT } from '@/hooks/useT';
 import { useWorkspace } from '@/hooks/queries/useWorkspace';
 import type { Agent } from '@/types/agent';
@@ -348,6 +349,7 @@ type TicketCardProps = { ticket: Ticket; agentMap: Record<string, Agent>; onClic
 
 function TicketCard({ agentMap, ticket, onClick }: TicketCardProps) {
   const t = useT();
+  const lang = useLang();
 
   const STATUS_LABEL: Record<TicketStatus, string> = {
     CLOSED: t('tickets.status_closed'),
@@ -357,7 +359,7 @@ function TicketCard({ agentMap, ticket, onClick }: TicketCardProps) {
     RESOLVED: t('tickets.status_resolved'),
   };
 
-  const time = formatRelativeTime(ticket.lastMessageAt);
+  const time = formatRelativeTime(ticket.lastMessageAt, lang);
   const assignedAgent = ticket.assignedAgentId ? (agentMap[ticket.assignedAgentId] ?? null) : null;
 
   const tagsWrapperRef = useRef<HTMLDivElement>(null);

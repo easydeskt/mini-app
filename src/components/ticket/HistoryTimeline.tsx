@@ -13,6 +13,7 @@ import {
   TimelineTitle,
 } from '@/components/reui/timeline';
 import { withAgent } from '@/components/ticket/ticketHelpers';
+import { useLang } from '@/hooks/useLang';
 import { useT } from '@/hooks/useT';
 import type { Ticket } from '@/types/ticket';
 import { formatExactTime } from '@/utils/formatters';
@@ -76,6 +77,7 @@ function buildHistoryEvents(ticket: Ticket, agentName: string | null, t: (key: s
 
 export function HistoryTimeline({ ticket, agentName }: HistoryTimelineProps) {
   const t = useT();
+  const lang = useLang();
   const events = buildHistoryEvents(ticket, agentName, t);
   return (
     <Timeline defaultValue={events.length} className="w-full">
@@ -98,7 +100,7 @@ export function HistoryTimeline({ ticket, agentName }: HistoryTimelineProps) {
           {event.time && (
             <TimelineContent>
               <TimelineDate className="mb-0 mt-0 text-muted-foreground">
-                {formatExactTime(event.time)}
+                {formatExactTime(event.time, lang)}
               </TimelineDate>
             </TimelineContent>
           )}

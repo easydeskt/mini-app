@@ -64,6 +64,7 @@ import { useAgent } from '@/hooks/queries/useAgent';
 import { useBackButton } from '@/hooks/useBackButton';
 import { useCurrentAgent } from '@/hooks/queries/useCurrentAgent';
 import { useT } from '@/hooks/useT';
+import { useLang } from '@/hooks/useLang';
 import type { TicketPriority } from '@/types/ticket';
 
 
@@ -71,6 +72,7 @@ export function TicketDetailPage() {
   const { id } = useParams<{ id: string }>();
   const ticketId = Number(id);
   const t = useT();
+  const lang = useLang();
   useBackButton();
 
   const { data: ticket, isError, isLoading, refetch, error } = useTicket(ticketId);
@@ -267,7 +269,7 @@ export function TicketDetailPage() {
                   {ticket.attachmentCount > 0 && (
                     <span className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 text-[11px] font-semibold text-muted-foreground">
                       <Paperclip className="h-3 w-3" />
-                      {formatAttachmentCount(ticket.attachmentCount)}
+                      {formatAttachmentCount(ticket.attachmentCount, lang)}
                     </span>
                   )}
                 </div>

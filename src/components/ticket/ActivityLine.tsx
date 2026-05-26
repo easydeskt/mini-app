@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { Check, Clock, GitMerge, Headphones, X } from 'lucide-react';
 
 import { withAgent } from '@/components/ticket/ticketHelpers';
+import { useLang } from '@/hooks/useLang';
 import { useT } from '@/hooks/useT';
 import type { Ticket } from '@/types/ticket';
 import { formatRelativeTime } from '@/utils/formatters';
@@ -14,6 +15,7 @@ type ActivityLineProps = {
 
 export function ActivityLine({ ticket, agentName }: ActivityLineProps) {
   const t = useT();
+  const lang = useLang();
   type Line = { icon: ReactNode; label: ReactNode; time?: string | null };
 
   const line = ((): Line => {
@@ -52,7 +54,7 @@ export function ActivityLine({ ticket, agentName }: ActivityLineProps) {
         {line.label}
       </div>
       {line.time && (
-        <span className="shrink-0 text-[12px] text-muted-foreground">{formatRelativeTime(line.time)}</span>
+        <span className="shrink-0 text-[12px] text-muted-foreground">{formatRelativeTime(line.time, lang)}</span>
       )}
     </div>
   );

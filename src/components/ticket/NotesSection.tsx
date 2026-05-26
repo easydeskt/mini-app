@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent } from '@/components/ui/card';
+import { useLang } from '@/hooks/useLang';
 import { useT } from '@/hooks/useT';
 import type { Note } from '@/types/ticket';
 import { formatRelativeTime } from '@/utils/formatters';
@@ -14,6 +15,7 @@ type NoteItemProps = {
 
 function NoteItem({ note }: NoteItemProps) {
   const t = useT();
+  const lang = useLang();
   const initials = getInitials(note.authorName);
   return (
     <div className="px-4 py-3">
@@ -28,7 +30,7 @@ function NoteItem({ note }: NoteItemProps) {
             {initials}
           </AvatarFallback>
         </Avatar>
-        <span className="text-xs text-muted-foreground">{note.authorName} · {formatRelativeTime(note.createdAt)}</span>
+        <span className="text-xs text-muted-foreground">{note.authorName} · {formatRelativeTime(note.createdAt, lang)}</span>
       </div>
     </div>
   );
