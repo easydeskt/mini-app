@@ -2,17 +2,19 @@ import { useEffect, useState } from 'react';
 
 import { initData, miniApp } from '@telegram-apps/sdk-react';
 
-import { setDevServer } from '@/api/client';
+import { KNOWN_SERVERS, MOCK_DEMO_VALUE, setDevServer } from '@/api/client';
+import { setupMockInterceptor } from '@/mocks/handler';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { createT } from '@/i18n';
 
-type ServerOption = 'production' | 'development' | 'custom';
+type ServerOption = 'production' | 'development' | 'demo' | 'custom';
 
 const SERVERS: Record<Exclude<ServerOption, 'custom'>, string> = {
-  production: 'https://easydesk.soknight.ru/api/v1',
-  development: 'http://localhost:8080/api/v1',
+  production: KNOWN_SERVERS.production,
+  development: KNOWN_SERVERS.development,
+  demo: MOCK_DEMO_VALUE,
 };
 
 type DevServerPickerProps = {
@@ -40,6 +42,7 @@ export function DevServerPicker({ onConnect }: DevServerPickerProps) {
       : SERVERS[selected];
     if (!origin) return;
     setDevServer(origin);
+    if (selected === 'demo') setupMockInterceptor();
     onConnect();
   }
 
@@ -83,6 +86,19 @@ export function DevServerPicker({ onConnect }: DevServerPickerProps) {
             <div>
               <p className="text-sm">{t('server_picker.option_development')}</p>
               <p className="font-mono text-xs text-muted-foreground">{SERVERS.development}</p>
+            </div>
+          </label>
+
+          <div className="h-px bg-border" />
+
+          <label
+            htmlFor="server-demo"
+            className="flex cursor-pointer items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/50 active:bg-muted"
+          >
+            <RadioGroupItem value="demo" id="server-demo" />
+            <div>
+              <p className="text-sm">{t('server_picker.option_demo')}</p>
+              <p className="font-mono text-xs text-muted-foreground">{SERVERS.demo}</p>
             </div>
           </label>
 

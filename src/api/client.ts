@@ -1,6 +1,12 @@
 import { initData } from '@telegram-apps/sdk-react';
 
 export const DEV_SERVER_KEY = 'easydesk_dev_server';
+export const MOCK_DEMO_VALUE = 'mock://demo';
+
+export const KNOWN_SERVERS = {
+  production: 'https://easydesk.soknight.ru/api/v1',
+  development: 'http://localhost:8080/api/v1',
+} as const;
 
 export function getBaseUrl(): string {
   if (import.meta.env.DEV) {
@@ -8,6 +14,10 @@ export function getBaseUrl(): string {
     if (stored) return stored;
   }
   return (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? 'http://localhost:8080/api/v1';
+}
+
+export function isMockMode(): boolean {
+  return localStorage.getItem(DEV_SERVER_KEY) === MOCK_DEMO_VALUE;
 }
 
 export function setDevServer(origin: string | null): void {

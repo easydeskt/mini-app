@@ -7,6 +7,12 @@ import { init } from 'src/init.ts';
 
 import './index.css';
 import './mockEnv.ts';
+import { isMockMode } from '@/api/client';
+import { setupMockInterceptor } from '@/mocks/handler';
+
+if (import.meta.env.DEV && isMockMode()) {
+  setupMockInterceptor();
+}
 
 const root = ReactDOM.createRoot(document.getElementById('root')!);
 
