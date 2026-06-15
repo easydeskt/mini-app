@@ -21,11 +21,19 @@ export default defineConfig({
     minify: 'terser',
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom', 'react-router'],
-          'vendor-query': ['@tanstack/react-query'],
-          'vendor-telegram': ['@telegram-apps/sdk-react'],
-          'vendor-motion': ['motion'],
+        manualChunks: (id) => {
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom') || id.includes('node_modules/react-router')) {
+            return 'vendor-react';
+          }
+          if (id.includes('node_modules/@tanstack/react-query')) {
+            return 'vendor-query';
+          }
+          if (id.includes('node_modules/@telegram-apps/sdk-react')) {
+            return 'vendor-telegram';
+          }
+          if (id.includes('node_modules/motion')) {
+            return 'vendor-motion';
+          }
         },
       },
     },
