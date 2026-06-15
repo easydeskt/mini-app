@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   build-and-push:
-    runs-on: blacksmith-2vcpu-ubuntu-22.04
+    runs-on: blacksmith-2vcpu-ubuntu-2404
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,24 +28,23 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Set up Docker builder
+        uses: useblacksmith/setup-docker-builder@v1
+
       - name: Build and push (dev)
         if: github.event_name == 'push'
-        uses: docker/build-push-action@v6
+        uses: useblacksmith/build-push-action@v2
         with:
           context: .
           push: true
           tags: ghcr.io/easydeskt/mini-app:dev
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
 
       - name: Build and push (release)
         if: github.event_name == 'workflow_dispatch'
-        uses: docker/build-push-action@v6
+        uses: useblacksmith/build-push-action@v2
         with:
           context: .
           push: true
           tags: |
             ghcr.io/easydeskt/mini-app:${{ inputs.version }}
             ghcr.io/easydeskt/mini-app:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
