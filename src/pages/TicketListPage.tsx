@@ -17,6 +17,8 @@ import { useTickets } from '@/hooks/queries/useTickets';
 import { formatRelativeTime } from '@/utils/formatters';
 import { getInitials } from '@/utils/initials';
 import { PRIORITY_ICON_BG, SourceIcon, STATUS_DOT } from '@/utils/ticketDisplay';
+import { ApiError } from '@/api/client';
+import { ErrorScreen } from '@/components/ErrorScreen';
 import { useAgents } from '@/hooks/queries/useAgents';
 import { useCurrentAgent } from '@/hooks/queries/useCurrentAgent';
 import { useLang } from '@/hooks/useLang';
@@ -44,7 +46,7 @@ export function TicketListPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const tgUser = useSignal(initData.user);
-  const { data: agent, isLoading: agentLoading } = useCurrentAgent();
+  const { data: agent, error: agentError, isLoading: agentLoading } = useCurrentAgent();
   const { data: agents } = useAgents();
   const { data: workspace } = useWorkspace();
   const { data: tickets, isError: ticketsError, isLoading: ticketsLoading, refetch: refetchTickets, error: ticketsFetchError } = useTickets();
@@ -134,6 +136,10 @@ export function TicketListPage() {
     const idx = FILTER_IDS.indexOf(activeFilter);
     if (dx < 0 && idx < FILTER_IDS.length - 1) setActiveFilter(FILTER_IDS[idx + 1]);
     else if (dx > 0 && idx > 0) setActiveFilter(FILTER_IDS[idx - 1]);
+  }
+
+  if (!agentLoading && agentError instanceof ApiError && agentError.status === 401) {
+    return <ErrorScreen title={t('common.access_denied')} />;
   }
 
   return (

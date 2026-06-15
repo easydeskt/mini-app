@@ -50,8 +50,8 @@ function toCurrentAgent(
   };
 }
 
-export function useCurrentAgent(): { data: CurrentAgent | undefined; isLoading: boolean } {
-  const { data, isLoading } = useQuery({
+export function useCurrentAgent(): { data: CurrentAgent | undefined; error: unknown; isLoading: boolean } {
+  const { data, error, isLoading } = useQuery({
     queryKey: queryKeys.me,
     queryFn: fetchMe,
     retry: false,
@@ -67,5 +67,5 @@ export function useCurrentAgent(): { data: CurrentAgent | undefined; isLoading: 
     telegramUsername = undefined;
   }
 
-  return { data: data ? toCurrentAgent(data, telegramUsername, locale) : undefined, isLoading };
+  return { data: data ? toCurrentAgent(data, telegramUsername, locale) : undefined, error, isLoading };
 }
