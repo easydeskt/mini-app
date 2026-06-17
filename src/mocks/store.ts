@@ -17,7 +17,7 @@ import {
   MOCK_WORKSPACE,
 } from './data';
 
-const STORE_KEY = 'easydesk_mock_state_v1';
+const STORE_KEY = 'easydesk_mock_state_v2';
 
 type MockState = {
   agents: ApiAgentResponse[];
