@@ -14,7 +14,6 @@ import { useCurrentAgent } from '@/hooks/queries/useCurrentAgent';
 import { useT } from '@/hooks/useT';
 import type { AgentRole } from '@/types/agent';
 
-
 function formatAvgResponse(minutes: number | null, lang: string): string {
   if (minutes === null) return '—';
   const h = Math.floor(minutes / 60);
@@ -134,7 +133,6 @@ export function ProfilePage() {
             </CardContent>
           </Card>
         </div>
-
 
         <div className="flex justify-center">
           {noData ? (
