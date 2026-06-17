@@ -4,7 +4,6 @@ import { initData, useSignal } from '@telegram-apps/sdk-react';
 import { ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router';
 
-import { DEV_SERVER_KEY, KNOWN_SERVERS, MOCK_DEMO_VALUE, setDevServer } from '@/api/client';
 import { InfoRow } from '@/components/shared/InfoRow';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -15,13 +14,6 @@ import { useCurrentAgent } from '@/hooks/queries/useCurrentAgent';
 import { useT } from '@/hooks/useT';
 import type { AgentRole } from '@/types/agent';
 
-function getServerLabel(t: (key: string) => string): string {
-  const stored = localStorage.getItem(DEV_SERVER_KEY);
-  if (!stored || stored === KNOWN_SERVERS.production) return t('profile.server_production');
-  if (stored === KNOWN_SERVERS.development) return t('profile.server_development');
-  if (stored === MOCK_DEMO_VALUE) return t('profile.server_demo');
-  try { return new URL(stored).hostname; } catch { return stored; }
-}
 
 function formatAvgResponse(minutes: number | null, lang: string): string {
   if (minutes === null) return '—';
@@ -143,20 +135,6 @@ export function ProfilePage() {
           </Card>
         </div>
 
-        {import.meta.env.DEV && (
-          <div>
-            <p className="mb-1.5 px-4 text-xs font-medium uppercase tracking-widest text-muted-foreground">
-              {t('profile.section_connection')}
-            </p>
-            <Card className="overflow-hidden py-0">
-              <CardContent className="p-0">
-                <InfoRow label={t('profile.field_server')} value={getServerLabel(t)} />
-                <div className="mx-4 h-px bg-border" />
-                <NavRow label={t('profile.action_change_server')} onClick={() => { setDevServer(null); window.location.reload(); }} />
-              </CardContent>
-            </Card>
-          </div>
-        )}
 
         <div className="flex justify-center">
           {noData ? (
