@@ -241,7 +241,12 @@ function handleMockRequest(url: string, method: string, init?: RequestInit): Res
   return null;
 }
 
+let interceptorInstalled = false;
+
 export function setupMockInterceptor(): void {
+  if (interceptorInstalled) return;
+  interceptorInstalled = true;
+
   const originalFetch = globalThis.fetch.bind(globalThis);
 
   globalThis.fetch = (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
