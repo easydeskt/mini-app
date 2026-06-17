@@ -1,7 +1,8 @@
 import { useState } from 'react';
 
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, KeyRound } from 'lucide-react';
 
+import { VaultPickerSheet } from '@/components/admin/VaultPickerSheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,6 +10,13 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Switch } from '@/components/ui/switch';
 import { useChannelT } from '@/hooks/useChannelT';
 import type { FieldSchema } from '@/types/channel';
+
+const SECRET_REF_PATTERN = /^\$([A-Z][A-Z0-9_]*)$/;
+
+function parseSecretRef(val: unknown): string | null {
+  if (typeof val !== 'string') return null;
+  return val.match(SECRET_REF_PATTERN)?.[1] ?? null;
+}
 
 type ChannelConfigFieldProps = {
   brand: string;
@@ -21,6 +29,7 @@ type ChannelConfigFieldProps = {
 
 export function ChannelConfigField({ brand, field, fieldId, sectionKey, value, onChange }: ChannelConfigFieldProps) {
   const [showPassword, setShowPassword] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const { fieldLabel, fieldPlaceholder, fieldDescription } = useChannelT(brand);
 
   const label = fieldLabel(sectionKey, field.key);
@@ -65,6 +74,7 @@ export function ChannelConfigField({ brand, field, fieldId, sectionKey, value, o
   }
 
   if (field.type === 'password') {
+    const secretName = parseSecretRef(value);
     return (
       <div className="space-y-1.5">
         <Label htmlFor={fieldId}>
@@ -73,27 +83,51 @@ export function ChannelConfigField({ brand, field, fieldId, sectionKey, value, o
         {description && (
           <p className="-mt-1 whitespace-pre-line text-xs text-muted-foreground">{description}</p>
         )}
-        <div className="relative">
-          <Input
-            id={fieldId}
-            type={showPassword ? 'text' : 'password'}
-            value={String(value ?? '')}
-            placeholder={placeholder}
-            onChange={e => onChange(e.target.value)}
-            required={field.required}
-            className="pr-10"
-          />
+        <div className="flex">
+          {secretName ? (
+            <div className="flex h-9 flex-1 items-center rounded-l-md border border-input bg-muted px-3 text-sm">
+              <KeyRound className="mr-2 h-3.5 w-3.5 shrink-0 text-primary" />
+              <span className="truncate font-mono text-primary">{secretName}</span>
+            </div>
+          ) : (
+            <div className="relative flex-1">
+              <Input
+                id={fieldId}
+                type={showPassword ? 'text' : 'password'}
+                value={String(value ?? '')}
+                placeholder={placeholder}
+                onChange={e => onChange(e.target.value)}
+                required={field.required}
+                className="rounded-r-none pr-10"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="absolute right-0 top-0 h-full w-10 px-3 text-muted-foreground hover:text-foreground"
+                onClick={() => setShowPassword(prev => !prev)}
+                tabIndex={-1}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </Button>
+            </div>
+          )}
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             size="icon"
-            className="absolute right-0 top-0 h-full w-10 px-3 text-muted-foreground hover:text-foreground"
-            onClick={() => setShowPassword(prev => !prev)}
+            className={`h-9 w-10 shrink-0 rounded-l-none border-l-0 ${secretName ? 'text-primary hover:text-primary' : 'text-muted-foreground'}`}
+            onClick={() => secretName ? onChange('') : setPickerOpen(true)}
             tabIndex={-1}
           >
-            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            <KeyRound className="h-4 w-4" />
           </Button>
         </div>
+        <VaultPickerSheet
+          open={pickerOpen}
+          onOpenChange={setPickerOpen}
+          onSelect={name => onChange(`$${name}`)}
+        />
       </div>
     );
   }

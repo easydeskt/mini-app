@@ -1,6 +1,6 @@
 import { type ReactNode, useEffect, useState } from 'react';
 
-import { ChevronRight, MessageCircleMore, MonitorSmartphone, Tag, Users } from 'lucide-react';
+import { ChevronRight, KeyRound, MessageCircleMore, MonitorSmartphone, Tag, Users } from 'lucide-react';
 import { useNavigate } from 'react-router';
 
 import { InfoRow } from '@/components/shared/InfoRow';
@@ -10,6 +10,7 @@ import { useAgents } from '@/hooks/queries/useAgents';
 import { useChannels } from '@/hooks/queries/useChannels';
 import { useTags } from '@/hooks/queries/useTags';
 import { useTemplates } from '@/hooks/queries/useTemplates';
+import { useSecrets } from '@/hooks/queries/useVault';
 import { useWorkspace } from '@/hooks/queries/useWorkspace';
 import { useBackButton } from '@/hooks/useBackButton';
 import { useT } from '@/hooks/useT';
@@ -22,6 +23,7 @@ const MGMT_ROUTES = [
   { icon: Tag, key: 'nav_tags', route: '/admin/tags', skeletonWidth: 'w-16' },
   { icon: MessageCircleMore, key: 'nav_templates', route: '/admin/templates', skeletonWidth: 'w-28' },
   { icon: MonitorSmartphone, key: 'nav_channels', route: '/admin/channels', skeletonWidth: 'w-20' },
+  { icon: KeyRound, key: 'nav_vault', route: '/admin/vault', skeletonWidth: 'w-24' },
 ] as const;
 
 type NavKey = (typeof MGMT_ROUTES)[number]['key'];
@@ -33,6 +35,7 @@ export function AdminPage() {
   const { data: tags, isLoading: tagsLoading } = useTags();
   const { data: templates, isLoading: templatesLoading } = useTemplates();
   const { data: channels, isLoading: channelsLoading } = useChannels();
+  const { data: secrets, isLoading: secretsLoading } = useSecrets();
   const t = useT();
 
   useBackButton();
@@ -73,6 +76,9 @@ export function AdminPage() {
     nav_channels: channelsLoading ? undefined : channels.length === 0
       ? t('admin.nav_channels_empty')
       : pluralizeRu(channels.length, t('channels.count_one'), t('channels.count_few'), t('channels.count_many')),
+    nav_vault: secretsLoading ? undefined : secrets.length === 0
+      ? t('admin.nav_vault_empty')
+      : pluralizeRu(secrets.length, t('vault.count_one'), t('vault.count_few'), t('vault.count_many')),
   };
 
   const sublabelLoadings: Record<NavKey, boolean> = {
@@ -80,6 +86,7 @@ export function AdminPage() {
     nav_channels: channelsLoading,
     nav_tags: tagsLoading,
     nav_templates: templatesLoading,
+    nav_vault: secretsLoading,
   };
 
   return (

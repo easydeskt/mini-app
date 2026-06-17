@@ -1,4 +1,7 @@
 export const queryKeys = {
+  vault: {
+    all: ['vault'] as const,
+  },
   agents: {
     all: ['agents'] as const,
     detail: (id: string) => ['agents', id] as const,

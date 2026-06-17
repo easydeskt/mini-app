@@ -14,6 +14,7 @@ import { ChannelsPage } from '@/pages/admin/ChannelsPage';
 import { TagsPage } from '@/pages/admin/TagsPage';
 import { TemplateEditPage } from '@/pages/admin/TemplateEditPage';
 import { TemplatesPage } from '@/pages/admin/TemplatesPage';
+import { VaultPage } from '@/pages/admin/VaultPage';
 
 export const router = createBrowserRouter([
   { path: '/', element: <Navigate to="/tickets" replace /> },
@@ -29,5 +30,6 @@ export const router = createBrowserRouter([
   { path: '/admin/templates/:id', element: <AdminGuard><TemplateEditPage /></AdminGuard> },
   { path: '/admin/channels', element: <AdminGuard><ChannelsPage /></AdminGuard> },
   { path: '/admin/channels/:id', element: <AdminGuard><ChannelEditPage /></AdminGuard> },
+  { path: '/admin/vault', element: <AdminGuard><VaultPage /></AdminGuard> },
   { path: '*', Component: NotFoundPage },
 ]);
