@@ -640,7 +640,10 @@ export const MOCK_TEMPLATES: ApiTemplateResponse[] = [
     id: 3,
     human_name: 'Нужна дополнительная информация',
     content: 'Для решения вашего вопроса нам потребуется уточнить несколько деталей:\n\n1. Когда именно возникла проблема?\n2. Какие шаги предпринимались до обращения?\n3. Есть ли скриншоты или сообщения об ошибке?\n\nЭто поможет нам разобраться быстрее.',
-    attachments: [],
+    attachments: [
+      { attachment_id: 1, template_id: 3, kind: 'PHOTO', file_name: 'primer_oshibki.jpg', file_size: 184320, content_type: 'image/jpeg', attributes: { width: 1280, height: 720 } },
+      { attachment_id: 2, template_id: 3, kind: 'DOCUMENT', file_name: 'kak_sdelat_skrinshot.pdf', file_size: 319488, content_type: 'application/pdf' },
+    ],
   },
   {
     id: 4,
@@ -664,7 +667,9 @@ export const MOCK_TEMPLATES: ApiTemplateResponse[] = [
     id: 7,
     human_name: 'Технические работы',
     content: '⚠️ В настоящее время на платформе проводятся плановые технические работы. Это может вызывать временные сбои в работе сервиса.\n\nОжидаемое время завершения: **{time}**.\n\nПриносим извинения за неудобства.',
-    attachments: [],
+    attachments: [
+      { attachment_id: 3, template_id: 7, kind: 'PHOTO', file_name: 'status_page.png', file_size: 247808, content_type: 'image/png', attributes: { width: 1440, height: 900 } },
+    ],
   },
   {
     id: 8,
@@ -682,7 +687,10 @@ export const MOCK_TEMPLATES: ApiTemplateResponse[] = [
     id: 10,
     human_name: 'Запрос скриншота / логов',
     content: 'Для диагностики проблемы, пожалуйста, пришлите:\n\n• **Скриншот** экрана с ошибкой\n• **Текст ошибки** (если есть)\n• **Дату и время** когда это произошло\n• **Браузер / устройство** которые вы используете\n\nЭто существенно ускорит решение вашего вопроса.',
-    attachments: [],
+    attachments: [
+      { attachment_id: 4, template_id: 10, kind: 'DOCUMENT', file_name: 'instrukciya_sbor_logov.pdf', file_size: 536576, content_type: 'application/pdf' },
+      { attachment_id: 5, template_id: 10, kind: 'VOICE', file_name: 'voice_instruktsiya.ogg', file_size: 47616, content_type: 'audio/ogg', attributes: { duration: 14 } },
+    ],
   },
   {
     id: 11,
