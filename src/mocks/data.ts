@@ -3,6 +3,7 @@ import type { ApiChannelResponse, ApiChannelProviderResponse } from '@/api/chann
 import type { ApiTagResponse } from '@/api/tags';
 import type { ApiTemplateResponse } from '@/api/templates';
 import type { ApiTicketResponse } from '@/api/tickets';
+import type { ApiVaultSecretResponse } from '@/api/vault';
 import type { MeResponse } from '@/api/me';
 import type { WorkspaceResponse } from '@/api/workspace';
 
@@ -697,13 +698,46 @@ export const MOCK_TEMPLATES: ApiTemplateResponse[] = [
   },
 ];
 
+export const MOCK_VAULT_SECRETS: ApiVaultSecretResponse[] = [
+  {
+    id: 1,
+    name: 'BOT_TOKEN_SUPPORT',
+    description: 'Токен Telegram-бота основного канала поддержки',
+    updated_at: ago(d(85)),
+  },
+  {
+    id: 2,
+    name: 'BOT_TOKEN_VIP',
+    description: 'Токен Telegram-бота VIP-канала',
+    updated_at: ago(d(60)),
+  },
+  {
+    id: 3,
+    name: 'BOT_TOKEN_STAGING',
+    description: 'Токен Telegram-бота для тестового окружения',
+    updated_at: ago(d(10)),
+  },
+  {
+    id: 4,
+    name: 'EMAIL_IMAP_PASSWORD',
+    description: 'Пароль почтового ящика для входящей почты (IMAP/SMTP)',
+    updated_at: ago(d(30)),
+  },
+  {
+    id: 5,
+    name: 'VK_ACCESS_TOKEN',
+    description: 'Токен доступа группы ВКонтакте',
+    updated_at: ago(d(25)),
+  },
+];
+
 export const MOCK_CHANNELS: ApiChannelResponse[] = [
   {
     id: 1,
     brand: 'telegram',
     display_name: 'Telegram Support',
     is_enabled: true,
-    config: { bot_token: '7123456789:AAxxxxx', username: 'easydesk_support_bot' },
+    config: { bot_token: '$BOT_TOKEN_SUPPORT', username: 'easydesk_support_bot' },
     created_at: ago(d(85)),
   },
   {
@@ -711,7 +745,7 @@ export const MOCK_CHANNELS: ApiChannelResponse[] = [
     brand: 'telegram',
     display_name: 'Telegram VIP',
     is_enabled: true,
-    config: { bot_token: '7987654321:BByyyyy', username: 'easydesk_vip_bot' },
+    config: { bot_token: '$BOT_TOKEN_VIP', username: 'easydesk_vip_bot' },
     created_at: ago(d(60)),
   },
   {
@@ -719,7 +753,7 @@ export const MOCK_CHANNELS: ApiChannelResponse[] = [
     brand: 'email',
     display_name: 'Email Support',
     is_enabled: true,
-    config: { address: 'support@easydesk.ru', imap_host: 'imap.mail.ru', smtp_host: 'smtp.mail.ru' },
+    config: { address: 'support@easydesk.ru', imap_host: 'imap.mail.ru', smtp_host: 'smtp.mail.ru', password: '$EMAIL_IMAP_PASSWORD' },
     created_at: ago(d(80)),
   },
   {
@@ -727,7 +761,7 @@ export const MOCK_CHANNELS: ApiChannelResponse[] = [
     brand: 'email',
     display_name: 'Email Sales',
     is_enabled: true,
-    config: { address: 'sales@easydesk.ru', imap_host: 'imap.mail.ru', smtp_host: 'smtp.mail.ru' },
+    config: { address: 'sales@easydesk.ru', imap_host: 'imap.mail.ru', smtp_host: 'smtp.mail.ru', password: '$EMAIL_IMAP_PASSWORD' },
     created_at: ago(d(45)),
   },
   {
@@ -735,7 +769,7 @@ export const MOCK_CHANNELS: ApiChannelResponse[] = [
     brand: 'vk',
     display_name: 'ВКонтакте',
     is_enabled: true,
-    config: { group_id: '219876543', access_token: 'vk1.a.xxxxxxxx' },
+    config: { group_id: '219876543', access_token: '$VK_ACCESS_TOKEN' },
     created_at: ago(d(30)),
   },
   {
@@ -743,7 +777,7 @@ export const MOCK_CHANNELS: ApiChannelResponse[] = [
     brand: 'telegram',
     display_name: 'Telegram Staging',
     is_enabled: false,
-    config: { bot_token: '6000000001:CCzzzzz', username: 'easydesk_staging_bot' },
+    config: { bot_token: '$BOT_TOKEN_STAGING', username: 'easydesk_staging_bot' },
     created_at: ago(d(10)),
   },
 ];

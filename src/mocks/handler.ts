@@ -1,4 +1,4 @@
-import { MOCK_AGENTS, MOCK_CHANNEL_PROVIDERS, MOCK_CHANNELS, MOCK_ME, MOCK_TAGS, MOCK_TEMPLATES, MOCK_TICKETS, MOCK_WORKSPACE } from './data';
+import { MOCK_AGENTS, MOCK_CHANNEL_PROVIDERS, MOCK_CHANNELS, MOCK_ME, MOCK_TAGS, MOCK_TEMPLATES, MOCK_TICKETS, MOCK_VAULT_SECRETS, MOCK_WORKSPACE } from './data';
 
 export const MOCK_ORIGIN = 'mock://demo';
 
@@ -92,6 +92,19 @@ function handleMockRequest(url: string, method: string): Response | null {
 
   // POST/PUT/DELETE /templates and attachments
   if (/^\/templates(\/\d+)?(\/attachments.*)?$/.test(path)) return noContent();
+
+  // GET /vault
+  if (method === 'GET' && path === '/vault') return ok(MOCK_VAULT_SECRETS);
+
+  // GET /vault/:id
+  const vaultMatch = path.match(/^\/vault\/(\d+)$/);
+  if (method === 'GET' && vaultMatch) {
+    const secret = MOCK_VAULT_SECRETS.find(s => s.id === Number(vaultMatch[1]));
+    return secret ? ok(secret) : notFound();
+  }
+
+  // POST/PUT/DELETE /vault
+  if (/^\/vault(\/\d+)?$/.test(path)) return noContent();
 
   return null;
 }
