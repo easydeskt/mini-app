@@ -1,4 +1,5 @@
-import { MOCK_AGENTS, MOCK_CHANNEL_PROVIDERS, MOCK_CHANNELS, MOCK_ME, MOCK_TAGS, MOCK_TEMPLATES, MOCK_TICKETS, MOCK_VAULT_SECRETS, MOCK_WORKSPACE } from './data';
+import { MOCK_CHANNEL_PROVIDERS } from './data';
+import { store } from './store';
 
 export const MOCK_ORIGIN = 'mock://demo';
 
@@ -20,91 +21,184 @@ function notFound(): Response {
   });
 }
 
-function handleMockRequest(url: string, method: string): Response | null {
-  const path = url.slice(MOCK_ORIGIN.length).split('?')[0];
+function parseBody(init?: RequestInit): Record<string, unknown> {
+  if (!init?.body || typeof init.body !== 'string') return {};
+  try { return JSON.parse(init.body) as Record<string, unknown>; } catch { return {}; }
+}
+
+function handleMockRequest(url: string, method: string, init?: RequestInit): Response | null {
+  const [pathRaw, queryString] = url.slice(MOCK_ORIGIN.length).split('?');
+  const path = pathRaw;
+  const params = new URLSearchParams(queryString ?? '');
+  const body = parseBody(init);
 
   // GET /me
-  if (method === 'GET' && path === '/me') return ok(MOCK_ME);
+  if (method === 'GET' && path === '/me') return ok(store.getMe());
 
   // GET /workspace
-  if (method === 'GET' && path === '/workspace') return ok(MOCK_WORKSPACE);
+  if (method === 'GET' && path === '/workspace') return ok(store.getWorkspace());
 
   // GET /agents
-  if (method === 'GET' && path === '/agents') return ok(MOCK_AGENTS);
-
-  // GET /agents/:id
-  const agentMatch = path.match(/^\/agents\/([^/]+)$/);
-  if (method === 'GET' && agentMatch) {
-    const agent = MOCK_AGENTS.find(a => a.id === agentMatch[1]);
-    return agent ? ok(agent) : notFound();
+  if (method === 'GET' && path === '/agents') {
+    const activeOnly = params.get('activeOnly') !== 'false';
+    return ok(store.getAgents(activeOnly));
   }
 
-  // PATCH /agents/:id
-  if (method === 'PATCH' && /^\/agents\/[^/]+$/.test(path)) return noContent();
+  // GET /agents/:id   PATCH /agents/:id
+  const agentMatch = path.match(/^\/agents\/([^/]+)$/);
+  if (agentMatch) {
+    const id = agentMatch[1];
+    if (method === 'GET') {
+      const agent = store.getAgent(id);
+      return agent ? ok(agent) : notFound();
+    }
+    if (method === 'PATCH') {
+      const result = store.patchAgent(id, body as { display_name?: string; is_active?: boolean; role?: string });
+      return result ? ok(result) : notFound();
+    }
+  }
 
   // GET /tags
-  if (method === 'GET' && path === '/tags') return ok(MOCK_TAGS);
+  if (method === 'GET' && path === '/tags') return ok(store.getTags());
 
-  // POST/PUT/DELETE /tags
-  if (/^\/tags(\/\d+)?$/.test(path)) return noContent();
+  // POST /tags
+  if (method === 'POST' && path === '/tags') {
+    return ok(store.createTag(body.name as string, (body.color ?? null) as number | null));
+  }
+
+  // PUT /tags/:id   DELETE /tags/:id
+  const tagMatch = path.match(/^\/tags\/(\d+)$/);
+  if (tagMatch) {
+    const id = Number(tagMatch[1]);
+    if (method === 'PUT') {
+      const result = store.updateTag(id, body.name as string, (body.color ?? null) as number | null);
+      return result ? ok(result) : notFound();
+    }
+    if (method === 'DELETE') {
+      return store.deleteTag(id) ? noContent() : notFound();
+    }
+  }
 
   // GET /tickets
-  if (method === 'GET' && path === '/tickets') return ok([...MOCK_TICKETS].sort((a, b) => b.last_message_at.localeCompare(a.last_message_at)));
+  if (method === 'GET' && path === '/tickets') {
+    const tagId = params.has('tagId') ? Number(params.get('tagId')) : undefined;
+    return ok(store.getTickets({
+      assignedAgentId: params.get('assignedAgentId') ?? undefined,
+      priority: params.get('priority') ?? undefined,
+      status: params.get('status') ?? undefined,
+      tagId,
+    }));
+  }
 
   // GET /tickets/:id
   const ticketMatch = path.match(/^\/tickets\/(\d+)$/);
   if (method === 'GET' && ticketMatch) {
-    const ticket = MOCK_TICKETS.find(t => t.id === Number(ticketMatch[1]));
+    const ticket = store.getTicket(Number(ticketMatch[1]));
     return ticket ? ok(ticket) : notFound();
   }
 
-  // POST /tickets/:id/* — mutations (assign, free, resolve, close, reopen, priority, tags, merge)
-  if (method === 'POST' && /^\/tickets\/\d+\//.test(path)) return noContent();
+  // PATCH /tickets/:id/attributes
+  if (method === 'PATCH' && /^\/tickets\/\d+\/attributes$/.test(path)) return noContent();
 
-  // PATCH /tickets/:id
-  if (method === 'PATCH' && /^\/tickets\/\d+$/.test(path)) return noContent();
+  // POST /tickets/:id/<action>
+  const ticketActionMatch = path.match(/^\/tickets\/(\d+)\/([^/]+)$/);
+  if (method === 'POST' && ticketActionMatch) {
+    const id = Number(ticketActionMatch[1]);
+    switch (ticketActionMatch[2]) {
+      case 'assign':   store.assignTicket(id, body.agent_id as string); return noContent();
+      case 'free':     store.freeTicket(id);                             return noContent();
+      case 'resolve':  store.resolveTicket(id);                          return noContent();
+      case 'close':    store.closeTicket(id);                            return noContent();
+      case 'reopen':   store.reopenTicket(id);                           return noContent();
+      case 'priority': store.setTicketPriority(id, body.priority as string | null); return noContent();
+      case 'tags':     store.setTicketTags(id, body.tag_ids as number[]); return noContent();
+      case 'merge':    store.mergeTicket(id, body.target_ticket_id as number); return noContent();
+    }
+  }
 
   // GET /channels/providers
   if (method === 'GET' && path === '/channels/providers') return ok(MOCK_CHANNEL_PROVIDERS);
 
-  // GET /channels
-  if (method === 'GET' && path === '/channels') return ok(MOCK_CHANNELS);
+  // GET /channels   POST /channels
+  if (path === '/channels') {
+    if (method === 'GET') {
+      const enabledOnly = params.get('enabledOnly') === 'true';
+      return ok(store.getChannels(enabledOnly));
+    }
+    if (method === 'POST') {
+      return ok(store.createChannel(body.brand as string, body.display_name as string, body.config as Record<string, unknown>));
+    }
+  }
 
-  // GET /channels/:id
+  // GET /channels/:id   PUT /channels/:id   DELETE /channels/:id
   const channelMatch = path.match(/^\/channels\/(\d+)$/);
-  if (method === 'GET' && channelMatch) {
-    const channel = MOCK_CHANNELS.find(c => c.id === Number(channelMatch[1]));
-    return channel ? ok(channel) : notFound();
+  if (channelMatch) {
+    const id = Number(channelMatch[1]);
+    if (method === 'GET') {
+      const channel = store.getChannel(id);
+      return channel ? ok(channel) : notFound();
+    }
+    if (method === 'PUT') {
+      const result = store.updateChannel(id, body.display_name as string, body.is_enabled as boolean, body.config as Record<string, unknown>);
+      return result ? ok(result) : notFound();
+    }
+    if (method === 'DELETE') {
+      return store.deleteChannel(id) ? noContent() : notFound();
+    }
   }
 
-  // POST/PUT/DELETE /channels
-  if (/^\/channels(\/\d+)?$/.test(path)) return noContent();
+  // GET /templates   POST /templates
+  if (path === '/templates') {
+    if (method === 'GET') return ok(store.getTemplates());
+    if (method === 'POST') {
+      return ok(store.createTemplate(body.human_name as string, (body.content ?? null) as string | null));
+    }
+  }
 
-  // GET /templates
-  if (method === 'GET' && path === '/templates') return ok(MOCK_TEMPLATES);
-
-  // GET /templates/:id
+  // GET /templates/:id   PUT /templates/:id   DELETE /templates/:id
   const templateMatch = path.match(/^\/templates\/(\d+)$/);
-  if (method === 'GET' && templateMatch) {
-    const template = MOCK_TEMPLATES.find(tp => tp.id === Number(templateMatch[1]));
-    return template ? ok(template) : notFound();
+  if (templateMatch) {
+    const id = Number(templateMatch[1]);
+    if (method === 'GET') {
+      const template = store.getTemplate(id);
+      return template ? ok(template) : notFound();
+    }
+    if (method === 'PUT') {
+      const result = store.updateTemplate(id, body.human_name as string, (body.content ?? null) as string | null);
+      return result ? ok(result) : notFound();
+    }
+    if (method === 'DELETE') {
+      return store.deleteTemplate(id) ? noContent() : notFound();
+    }
   }
 
-  // POST/PUT/DELETE /templates and attachments
-  if (/^\/templates(\/\d+)?(\/attachments.*)?$/.test(path)) return noContent();
+  // Template attachments — not mocked (file uploads)
+  if (/^\/templates\/\d+\/attachments/.test(path)) return noContent();
 
-  // GET /vault
-  if (method === 'GET' && path === '/vault') return ok(MOCK_VAULT_SECRETS);
+  // GET /vault   POST /vault
+  if (path === '/vault') {
+    if (method === 'GET') return ok(store.getSecrets());
+    if (method === 'POST') {
+      return ok(store.createSecret(body.name as string, (body.description ?? null) as string | null));
+    }
+  }
 
-  // GET /vault/:id
+  // GET /vault/:id   PUT /vault/:id   DELETE /vault/:id
   const vaultMatch = path.match(/^\/vault\/(\d+)$/);
-  if (method === 'GET' && vaultMatch) {
-    const secret = MOCK_VAULT_SECRETS.find(s => s.id === Number(vaultMatch[1]));
-    return secret ? ok(secret) : notFound();
+  if (vaultMatch) {
+    const id = Number(vaultMatch[1]);
+    if (method === 'GET') {
+      const secret = store.getSecret(id);
+      return secret ? ok(secret) : notFound();
+    }
+    if (method === 'PUT') {
+      const result = store.updateSecret(id, (body.description ?? null) as string | null);
+      return result ? ok(result) : notFound();
+    }
+    if (method === 'DELETE') {
+      return store.deleteSecret(id) ? noContent() : notFound();
+    }
   }
-
-  // POST/PUT/DELETE /vault
-  if (/^\/vault(\/\d+)?$/.test(path)) return noContent();
 
   return null;
 }
@@ -121,7 +215,7 @@ export function setupMockInterceptor(): void {
 
     if (url.startsWith(MOCK_ORIGIN)) {
       const method = (init?.method ?? (input instanceof Request ? input.method : 'GET')).toUpperCase();
-      const response = handleMockRequest(url, method);
+      const response = handleMockRequest(url, method, init);
       if (response) return Promise.resolve(response);
     }
 
