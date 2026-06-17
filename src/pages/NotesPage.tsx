@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, Plus, Search, X } from 'lucide-react';
 import { useParams } from 'react-router';
 
@@ -10,6 +11,8 @@ import { Input } from '@/components/ui/input';
 import { FetchError } from '@/components/ui/list-error';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { deleteNote } from '@/api/tickets';
+import { queryKeys } from '@/api/query-keys';
 import { useTicket } from '@/hooks/queries/useTicket';
 import { useBackButton } from '@/hooks/useBackButton';
 import { useT } from '@/hooks/useT';
@@ -37,6 +40,12 @@ export function NotesPage() {
 
   const hasTicketContext = !isNaN(ticketId) && ticketId > 0;
   const { data: ticket, isError, isLoading, refetch, error } = useTicket(ticketId);
+
+  const queryClient = useQueryClient();
+  const deleteMutation = useMutation({
+    mutationFn: (note: Note) => deleteNote(ticketId, note.id, note.type),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: queryKeys.tickets.detail(ticketId) }),
+  });
 
   const notes = ticket?.notes ?? [];
 
@@ -144,7 +153,7 @@ export function NotesPage() {
           )}
 
           {!isLoading && !isError && !showTicketWarning && filteredNotes.map((note) => (
-            <NoteCard key={note.id} note={note} ticketId={ticketId} onEdit={openEdit} onDelete={() => {}} />
+            <NoteCard key={note.id} note={note} ticketId={ticketId} onEdit={openEdit} onDelete={(n) => deleteMutation.mutate(n)} />
           ))}
         </div>
       </div>

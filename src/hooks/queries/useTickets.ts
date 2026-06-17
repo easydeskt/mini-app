@@ -25,7 +25,7 @@ export function toTicket(t: ApiTicketResponse): Ticket {
       createdAt: n.created_at,
       id: n.id,
       text: n.text,
-      type: n.type.toLowerCase() as NoteType,
+      type: n.scope.toLowerCase() as NoteType,
     })),
     messagePreview: t.message_preview ?? null,
     priority: t.priority != null ? (t.priority.toUpperCase() as TicketPriority) : null,

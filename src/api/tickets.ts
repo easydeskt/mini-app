@@ -5,8 +5,8 @@ export type ApiNoteResponse = {
   author_name: string;
   created_at: string;
   id: number;
+  scope: string;
   text: string;
-  type: string;
 };
 
 export type ApiTicketResponse = {
@@ -81,3 +81,12 @@ export const mergeTickets = (id: number, targetId: number) =>
 
 export const setTicketAttributes = (id: number, attributes: Record<string, unknown>) =>
   apiClient.patch<void>(`/tickets/${id}/attributes`, attributes);
+
+export const createNote = (ticketId: number, scope: string, text: string) =>
+  apiClient.post<ApiNoteResponse>(`/tickets/${ticketId}/notes`, { scope, text });
+
+export const updateNote = (ticketId: number, noteId: number, scope: string, text: string) =>
+  apiClient.put<ApiNoteResponse>(`/tickets/${ticketId}/notes/${noteId}`, { scope, text });
+
+export const deleteNote = (ticketId: number, noteId: number, scope: string) =>
+  apiClient.delete(`/tickets/${ticketId}/notes/${noteId}?scope=${scope}`);

@@ -3,7 +3,7 @@ import type { ApiChannelResponse } from '@/api/channels';
 import type { MeResponse } from '@/api/me';
 import type { ApiTagResponse } from '@/api/tags';
 import type { ApiTemplateResponse } from '@/api/templates';
-import type { ApiTicketResponse } from '@/api/tickets';
+import type { ApiNoteResponse, ApiTicketResponse } from '@/api/tickets';
 import type { ApiVaultSecretResponse } from '@/api/vault';
 import type { WorkspaceResponse } from '@/api/workspace';
 import {
@@ -35,7 +35,7 @@ function defaultState(): MockState {
     agents: structuredClone(MOCK_AGENTS),
     channels: structuredClone(MOCK_CHANNELS),
     meAgentId: MOCK_AGENTS[0].id,
-    nextId: { channels: 1000, tags: 1000, templates: 1000, vault: 1000 },
+    nextId: { channels: 1000, notes: 1000, tags: 1000, templates: 1000, vault: 1000 },
     tags: structuredClone(MOCK_TAGS),
     templates: structuredClone(MOCK_TEMPLATES),
     tickets: structuredClone(MOCK_TICKETS),
@@ -331,6 +331,48 @@ export const store = {
       .map(tid => state.tags.find(t => t.id === tid))
       .filter((t): t is ApiTagResponse => t !== undefined);
     state.tickets[idx] = { ...state.tickets[idx], tags };
+    persist();
+    return true;
+  },
+
+  // --- Notes ---
+
+  addNote(ticketId: number, scope: string, text: string): ApiNoteResponse | null {
+    const idx = state.tickets.findIndex(t => t.id === ticketId);
+    if (idx < 0) return null;
+    const agent = state.agents.find(a => a.id === state.meAgentId);
+    const note: ApiNoteResponse = {
+      id: nextId('notes'),
+      scope,
+      author_name: agent?.display_name ?? 'Agent',
+      text,
+      created_at: now(),
+    };
+    state.tickets[idx] = { ...state.tickets[idx], notes: [...(state.tickets[idx].notes ?? []), note] };
+    persist();
+    return note;
+  },
+
+  updateNote(ticketId: number, noteId: number, scope: string, text: string): ApiNoteResponse | null {
+    const ticketIdx = state.tickets.findIndex(t => t.id === ticketId);
+    if (ticketIdx < 0) return null;
+    const notes = state.tickets[ticketIdx].notes ?? [];
+    const noteIdx = notes.findIndex(n => n.id === noteId);
+    if (noteIdx < 0) return null;
+    const updated: ApiNoteResponse = { ...notes[noteIdx], scope, text };
+    const updatedNotes = [...notes];
+    updatedNotes[noteIdx] = updated;
+    state.tickets[ticketIdx] = { ...state.tickets[ticketIdx], notes: updatedNotes };
+    persist();
+    return updated;
+  },
+
+  deleteNote(ticketId: number, noteId: number): boolean {
+    const ticketIdx = state.tickets.findIndex(t => t.id === ticketId);
+    if (ticketIdx < 0) return false;
+    const notes = state.tickets[ticketIdx].notes ?? [];
+    if (!notes.some(n => n.id === noteId)) return false;
+    state.tickets[ticketIdx] = { ...state.tickets[ticketIdx], notes: notes.filter(n => n.id !== noteId) };
     persist();
     return true;
   },

@@ -14,6 +14,13 @@ function noContent(): Response {
   return new Response(null, { status: 204 });
 }
 
+function created(data: unknown): Response {
+  return new Response(JSON.stringify(data), {
+    status: 201,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
 function notFound(): Response {
   return new Response(JSON.stringify({ error_message: 'Not found' }), {
     status: 404,
@@ -99,6 +106,37 @@ function handleMockRequest(url: string, method: string, init?: RequestInit): Res
 
   // PATCH /tickets/:id/attributes
   if (method === 'PATCH' && /^\/tickets\/\d+\/attributes$/.test(path)) return noContent();
+
+  // GET|POST /tickets/:id/notes
+  const ticketNotesMatch = path.match(/^\/tickets\/(\d+)\/notes$/);
+  if (ticketNotesMatch) {
+    const id = Number(ticketNotesMatch[1]);
+    if (method === 'GET') {
+      const ticket = store.getTicket(id);
+      if (!ticket) return notFound();
+      const scope = params.get('scope') ?? 'all';
+      const notes = ticket.notes ?? [];
+      return ok(scope === 'all' ? notes : notes.filter(n => n.scope === scope));
+    }
+    if (method === 'POST') {
+      const note = store.addNote(id, body.scope as string, body.text as string);
+      return note ? created(note) : notFound();
+    }
+  }
+
+  // PUT|DELETE /tickets/:id/notes/:noteId
+  const ticketNoteMatch = path.match(/^\/tickets\/(\d+)\/notes\/(\d+)$/);
+  if (ticketNoteMatch) {
+    const ticketId = Number(ticketNoteMatch[1]);
+    const noteId = Number(ticketNoteMatch[2]);
+    if (method === 'PUT') {
+      const note = store.updateNote(ticketId, noteId, body.scope as string, body.text as string);
+      return note ? ok(note) : notFound();
+    }
+    if (method === 'DELETE') {
+      return store.deleteNote(ticketId, noteId) ? noContent() : notFound();
+    }
+  }
 
   // POST /tickets/:id/<action>
   const ticketActionMatch = path.match(/^\/tickets\/(\d+)\/([^/]+)$/);

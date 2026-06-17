@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react';
 
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { NotebookPen, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { createNote, deleteNote, updateNote } from '@/api/tickets';
+import { queryKeys } from '@/api/query-keys';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,6 +38,29 @@ export function NoteEditSheet({ note, ticketId, open, onOpenChange }: NoteEditSh
   const [text, setText] = useState('');
   const [scope, setScope] = useState<NoteType>('client');
   const [deleteOpen, setDeleteOpen] = useState(false);
+
+  const queryClient = useQueryClient();
+
+  const saveMutation = useMutation({
+    mutationFn: () => isEditing
+      ? updateNote(ticketId!, note!.id, scope, text.trim())
+      : createNote(ticketId!, scope, text.trim()),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.tickets.detail(ticketId!) });
+      onOpenChange(false);
+    },
+    onError: () => toast.error(t('notes.save_error') ?? 'Failed to save note'),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteNote(ticketId!, note!.id, note!.type),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.tickets.detail(ticketId!) });
+      setDeleteOpen(false);
+      onOpenChange(false);
+    },
+    onError: () => toast.error(t('notes.delete_error') ?? 'Failed to delete note'),
+  });
 
   useEffect(() => {
     if (open) {
@@ -112,8 +138,8 @@ export function NoteEditSheet({ note, ticketId, open, onOpenChange }: NoteEditSh
 
             <Button
               className="w-full"
-              disabled={text.trim().length === 0}
-              onClick={() => onOpenChange(false)}
+              disabled={text.trim().length === 0 || saveMutation.isPending || !ticketId}
+              onClick={() => saveMutation.mutate()}
             >
               {isEditing ? t('notes.save') : t('notes.create')}
             </Button>
@@ -132,7 +158,7 @@ export function NoteEditSheet({ note, ticketId, open, onOpenChange }: NoteEditSh
               <AlertDialogCancel>{t('notes.delete_cancel')}</AlertDialogCancel>
               <AlertDialogAction
                 variant="destructive"
-                onClick={() => { setDeleteOpen(false); onOpenChange(false); }}
+                onClick={() => deleteMutation.mutate()}
               >
                 {t('notes.delete_confirm_ok')}
               </AlertDialogAction>
