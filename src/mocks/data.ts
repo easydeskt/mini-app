@@ -719,12 +719,18 @@ export const MOCK_VAULT_SECRETS: ApiVaultSecretResponse[] = [
   },
   {
     id: 4,
-    name: 'EMAIL_IMAP_PASSWORD',
-    description: 'Пароль почтового ящика для входящей почты (IMAP/SMTP)',
-    updated_at: ago(d(30)),
+    name: 'EMAIL_SUPPORT_PASSWORD',
+    description: 'Пароль ящика support@easydesk.ru (IMAP + SMTP)',
+    updated_at: ago(d(80)),
   },
   {
     id: 5,
+    name: 'EMAIL_SALES_PASSWORD',
+    description: 'Пароль ящика sales@easydesk.ru (IMAP + SMTP)',
+    updated_at: ago(d(45)),
+  },
+  {
+    id: 6,
     name: 'VK_ACCESS_TOKEN',
     description: 'Токен доступа группы ВКонтакте',
     updated_at: ago(d(25)),
@@ -734,34 +740,52 @@ export const MOCK_VAULT_SECRETS: ApiVaultSecretResponse[] = [
 export const MOCK_CHANNELS: ApiChannelResponse[] = [
   {
     id: 1,
-    brand: 'telegram',
+    brand: 'tg',
     display_name: 'Telegram Support',
     is_enabled: true,
-    config: { bot_token: '$BOT_TOKEN_SUPPORT', username: 'easydesk_support_bot' },
+    config: {
+      token: '$BOT_TOKEN_SUPPORT',
+      api_url: 'https://api.telegram.org',
+      polling: { enabled: true, timeout_seconds: 30, media_groups_debounce_millis: 1000 },
+      webhook: { enabled: false, listen_path: '/telegram/webhook', max_connections: 40, drop_pending_updates: false },
+    },
     created_at: ago(d(85)),
   },
   {
     id: 2,
-    brand: 'telegram',
+    brand: 'tg',
     display_name: 'Telegram VIP',
     is_enabled: true,
-    config: { bot_token: '$BOT_TOKEN_VIP', username: 'easydesk_vip_bot' },
+    config: {
+      token: '$BOT_TOKEN_VIP',
+      api_url: 'https://api.telegram.org',
+      polling: { enabled: true, timeout_seconds: 30, media_groups_debounce_millis: 1000 },
+      webhook: { enabled: false, listen_path: '/telegram/webhook', max_connections: 40, drop_pending_updates: false },
+    },
     created_at: ago(d(60)),
   },
   {
     id: 3,
-    brand: 'email',
+    brand: 'mail',
     display_name: 'Email Support',
     is_enabled: true,
-    config: { address: 'support@easydesk.ru', imap_host: 'imap.mail.ru', smtp_host: 'smtp.mail.ru', password: '$EMAIL_IMAP_PASSWORD' },
+    config: {
+      from: { address: 'support@easydesk.ru', name: 'EasyDesk Support' },
+      imap: { host: 'imap.mail.ru', port: 993, username: 'support@easydesk.ru', password: '$EMAIL_SUPPORT_PASSWORD', folder: 'INBOX', use_ssl: true, poll_interval_seconds: 30 },
+      smtp: { host: 'smtp.mail.ru', port: 465, username: 'support@easydesk.ru', password: '$EMAIL_SUPPORT_PASSWORD' },
+    },
     created_at: ago(d(80)),
   },
   {
     id: 4,
-    brand: 'email',
+    brand: 'mail',
     display_name: 'Email Sales',
     is_enabled: true,
-    config: { address: 'sales@easydesk.ru', imap_host: 'imap.mail.ru', smtp_host: 'smtp.mail.ru', password: '$EMAIL_IMAP_PASSWORD' },
+    config: {
+      from: { address: 'sales@easydesk.ru', name: 'EasyDesk Sales' },
+      imap: { host: 'imap.mail.ru', port: 993, username: 'sales@easydesk.ru', password: '$EMAIL_SALES_PASSWORD', folder: 'INBOX', use_ssl: true, poll_interval_seconds: 60 },
+      smtp: { host: 'smtp.mail.ru', port: 465, username: 'sales@easydesk.ru', password: '$EMAIL_SALES_PASSWORD' },
+    },
     created_at: ago(d(45)),
   },
   {
@@ -769,73 +793,148 @@ export const MOCK_CHANNELS: ApiChannelResponse[] = [
     brand: 'vk',
     display_name: 'ВКонтакте',
     is_enabled: true,
-    config: { group_id: '219876543', access_token: '$VK_ACCESS_TOKEN' },
+    config: {
+      group_id: 219876543,
+      token: '$VK_ACCESS_TOKEN',
+      longpoll: { enabled: true, wait_seconds: 25 },
+      callback: { enabled: false, confirmation_code: '', listen_path: '/vkontakte/callback' },
+    },
     created_at: ago(d(30)),
   },
   {
     id: 6,
-    brand: 'telegram',
+    brand: 'tg',
     display_name: 'Telegram Staging',
     is_enabled: false,
-    config: { bot_token: '$BOT_TOKEN_STAGING', username: 'easydesk_staging_bot' },
+    config: {
+      token: '$BOT_TOKEN_STAGING',
+      api_url: 'https://api.telegram.org',
+      polling: { enabled: false, timeout_seconds: 30, media_groups_debounce_millis: 1000 },
+      webhook: { enabled: true, url: 'https://staging.easydesk.ru/telegram/webhook', listen_path: '/telegram/webhook', max_connections: 40, drop_pending_updates: true },
+    },
     created_at: ago(d(10)),
   },
 ];
 
 export const MOCK_CHANNEL_PROVIDERS: ApiChannelProviderResponse[] = [
   {
-    brand: 'telegram',
+    brand: 'tg',
     name: 'Telegram',
     config: {
       sections: [
         {
-          key: '__basic__',
+          key: '',
           fields: [
-            { key: 'bot_token', type: 'text.password', required: true, placeholder: '1234567890:AAxxxxxxxx', default_value: null },
-            { key: 'username',  type: 'text.default',  required: false, placeholder: 'my_support_bot', default_value: null },
+            { key: 'token',   type: 'text.password', required: false, placeholder: null, default_value: null },
+            { key: 'api_url', type: 'text.url',       required: false, placeholder: null, default_value: 'https://api.telegram.org' },
           ],
-          order: ['bot_token', 'username'],
+          order: [],
+        },
+        {
+          key: 'polling',
+          fields: [
+            { key: 'enabled',                       type: 'boolean',    required: false, placeholder: null, default_value: 'true' },
+            { key: 'timeout_seconds',               type: 'number.int', required: false, placeholder: null, default_value: '30' },
+            { key: 'media_groups_debounce_millis',  type: 'number.long', required: false, placeholder: null, default_value: '1000' },
+          ],
+          order: [],
+        },
+        {
+          key: 'webhook',
+          fields: [
+            { key: 'enabled',               type: 'boolean',      required: false, placeholder: null, default_value: 'false' },
+            { key: 'url',                   type: 'text.url',     required: true,  placeholder: null, default_value: null },
+            { key: 'listen_path',           type: 'text.default', required: false, placeholder: null, default_value: '/telegram/webhook' },
+            { key: 'secret_token',          type: 'text.password', required: false, placeholder: null, default_value: null },
+            { key: 'drop_pending_updates',  type: 'boolean',      required: false, placeholder: null, default_value: 'false' },
+            { key: 'max_connections',       type: 'number.int',   required: false, placeholder: null, default_value: '40' },
+          ],
+          order: [],
         },
       ],
-      order: ['__basic__'],
+      order: [],
     },
   },
   {
-    brand: 'email',
+    brand: 'mail',
     name: 'Email',
     config: {
       sections: [
         {
-          key: '__basic__',
+          key: '',
           fields: [
-            { key: 'address',   type: 'text.url',      required: true,  placeholder: 'support@company.ru', default_value: null },
-            { key: 'imap_host', type: 'text.default',  required: true,  placeholder: 'imap.mail.ru',       default_value: null },
-            { key: 'imap_port', type: 'number.int',    required: false, placeholder: '993',                default_value: '993' },
-            { key: 'smtp_host', type: 'text.default',  required: true,  placeholder: 'smtp.mail.ru',       default_value: null },
-            { key: 'smtp_port', type: 'number.int',    required: false, placeholder: '465',                default_value: '465' },
-            { key: 'password',  type: 'text.password', required: true,  placeholder: null,                 default_value: null },
+            { key: 'reply_to', type: 'text.default', required: false, placeholder: null, default_value: null },
           ],
-          order: ['address', 'imap_host', 'imap_port', 'smtp_host', 'smtp_port', 'password'],
+          order: [],
+        },
+        {
+          key: 'from',
+          fields: [
+            { key: 'address', type: 'text.default', required: true,  placeholder: null, default_value: null },
+            { key: 'name',    type: 'text.default', required: false, placeholder: null, default_value: null },
+          ],
+          order: [],
+        },
+        {
+          key: 'imap',
+          fields: [
+            { key: 'host',                  type: 'text.default',  required: false, placeholder: null, default_value: null },
+            { key: 'port',                  type: 'number.int',    required: false, placeholder: null, default_value: '993' },
+            { key: 'username',              type: 'text.default',  required: false, placeholder: null, default_value: null },
+            { key: 'password',              type: 'text.password', required: false, placeholder: null, default_value: null },
+            { key: 'folder',                type: 'text.default',  required: false, placeholder: null, default_value: 'INBOX' },
+            { key: 'use_ssl',               type: 'boolean',       required: false, placeholder: null, default_value: 'true' },
+            { key: 'poll_interval_seconds', type: 'number.int',    required: false, placeholder: null, default_value: '30' },
+          ],
+          order: [],
+        },
+        {
+          key: 'smtp',
+          fields: [
+            { key: 'host',     type: 'text.default',  required: false, placeholder: null, default_value: null },
+            { key: 'port',     type: 'number.int',    required: false, placeholder: null, default_value: '587' },
+            { key: 'username', type: 'text.default',  required: false, placeholder: null, default_value: null },
+            { key: 'password', type: 'text.password', required: false, placeholder: null, default_value: null },
+          ],
+          order: [],
         },
       ],
-      order: ['__basic__'],
+      order: ['from', 'imap', 'smtp', 'reply_to'],
     },
   },
   {
     brand: 'vk',
-    name: 'ВКонтакте',
+    name: 'VKontakte',
     config: {
       sections: [
         {
-          key: '__basic__',
+          key: '',
           fields: [
-            { key: 'group_id',     type: 'number.long',  required: true,  placeholder: '123456789', default_value: null },
-            { key: 'access_token', type: 'text.password', required: true, placeholder: 'vk1.a.…',   default_value: null },
+            { key: 'group_id', type: 'number.long',  required: true, placeholder: null, default_value: '0' },
+            { key: 'token',    type: 'text.password', required: true, placeholder: null, default_value: null },
           ],
-          order: ['group_id', 'access_token'],
+          order: [],
+        },
+        {
+          key: 'longpoll',
+          fields: [
+            { key: 'enabled',      type: 'boolean',    required: false, placeholder: null, default_value: 'true' },
+            { key: 'wait_seconds', type: 'number.int', required: false, placeholder: null, default_value: '30' },
+          ],
+          order: [],
+        },
+        {
+          key: 'callback',
+          fields: [
+            { key: 'enabled',           type: 'boolean',      required: false, placeholder: null, default_value: 'false' },
+            { key: 'confirmation_code', type: 'text.default', required: true,  placeholder: null, default_value: null },
+            { key: 'listen_path',       type: 'text.default', required: false, placeholder: null, default_value: '/vkontakte/callback' },
+            { key: 'secret',            type: 'text.password', required: false, placeholder: null, default_value: null },
+          ],
+          order: [],
         },
       ],
-      order: ['__basic__'],
+      order: [],
     },
   },
 ];
