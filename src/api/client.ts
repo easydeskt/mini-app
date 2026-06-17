@@ -9,10 +9,8 @@ export const KNOWN_SERVERS = {
 } as const;
 
 export function getBaseUrl(): string {
-  if (import.meta.env.DEV) {
-    const stored = localStorage.getItem(DEV_SERVER_KEY);
-    if (stored) return stored;
-  }
+  const stored = localStorage.getItem(DEV_SERVER_KEY);
+  if (stored) return stored;
   return (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? '/api/v1';
 }
 

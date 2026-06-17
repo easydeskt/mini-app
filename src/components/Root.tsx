@@ -10,10 +10,8 @@ import { App } from 'src/components/App.tsx';
 import { ErrorBoundary } from 'src/components/ErrorBoundary.tsx';
 import { ErrorScreen } from 'src/components/ErrorScreen.tsx';
 
-if (import.meta.env.DEV) {
-  setDevServer(MOCK_DEMO_VALUE);
-  setupMockInterceptor();
-}
+setDevServer(MOCK_DEMO_VALUE);
+setupMockInterceptor();
 
 function getLang() {
   return initData.user()?.language_code === 'ru' ? 'ru' : 'en';
